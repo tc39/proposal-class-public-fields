@@ -106,10 +106,6 @@ The purpose for generating and storing these "thunk" functions is a means of def
 1. For each entry on `DefinedClass.prototype[Symbol.ClassProperties]`, call the value as a function with a `this` value equal to the `this` value of the object being constructed.
 2. Store the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.ClassProperties]` entry currently being evaluated.
 
-##### Spec Text
-
-\<\<TODO>>
-
 ## Proposal 2/2: ES Class "Static" Properties
 
 This is a proposal very much related to the former, but is much simpler in scope (and thus is separated into a separate proposal for sake of simplicity). This proposal intends to include a declarative means of expressing "static" properties on an ES class. These property declarations may include intializers, but are not required to do so.
@@ -131,5 +127,9 @@ class MyClass {
 \<\<TODO>>
 
 ### How?
+
+\<\<TODO>>
+
+## Spec Text
 
 \<\<TODO>>
