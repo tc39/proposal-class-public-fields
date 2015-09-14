@@ -80,33 +80,33 @@ class ClassWithInits {
 }
 ```
 
-##### Declarations Without Initializers
+##### Property Declarations Without Initializers
 
-When no initializer is specified for a declared property, the property declaration will act as a no-op. This is useful for scenarios where initialization needs to happen somewhere other than in the initializer position (ex. If the property is or depends on constructor-injected data, or if the property is managed externally by something like a decorator/framework, etc). Additionally, it's useful for derived classes to "silently" specify a class property that may have been setup on a base class (either using or not using property declarations). For this reason, a declaration with no initializer should not attempt to zero-out data potentially written by a base class with something like `undefined` or `null`.
+When no initializer is specified for a declared property, the property declaration will act as a no-op. This is useful for scenarios where initialization needs to happen somewhere other than in the initializer position (ex. If the property depends on constructor-injected data and thus needs to be initialized inside the construtor, or if the property is managed externally by something like a decorator or framework).
 
-##### Declarations With Initializers
+Additionally, it's sometimes useful for derived classes to "silently" specify a class property that may have been setup on a base class (either using or not using property declarations). For this reason, a declaration with no initializer should not attempt to overwrite data potentially written by a base class.
 
-When a property with an initializer is specifed on a non-derived class (meaning a class without an `extends` clause), the initializers are declared and executed in the order they are specified in the internal "initialization" process that occurs immediately *before* entering the constructor.
+##### Property Declarations With Initializers
 
-When an initializer is specified on a derived class (meaning a class with an `extends` clause), the initializers are declared and executed in the order they are specified at the end of the in the internal "initialization" process that occurs while executing `super()` in the derived constructor. This means that if a derived constructor never calls `super()`, instance properties specified on the derived class will not be initialized since property initialization is considered a part of the allocation process.
+When a property with an initializer is specifed on a non-derived class (AKA a class without an `extends` clause), the initializers are declared and executed in the order they are specified in the class definition. Execution of the initializers happens during the internal "initialization" process that occurs immediately *before* entering the constructor.
 
-##### Property Declaration & Execution
+When an initializer is specified on a derived class (AKA a class with an `extends` clause), the initializers are declared and executed in the order they are specified in the class definition. Execution of the initializers happens at the end of the internal "initialization" process that occurs while executing `super()` in the derived constructor. This means that if a derived constructor never calls `super()`, instance properties specified on the derived class will not be initialized since property initialization is considered a part of the [SuperCall Evaluation process](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-super-keyword-runtime-semantics-evaluation).
 
-The process of declaring a property happens at the time of class definition evaluation. The process for deciding when to execute a property's initializer is described above in [Declarations Without Initializers](#declarations-without-initializers) and [Declarations With Initializers](#declarations-with-initializers).
+##### Property Declaration & Execution Process
+
+The process of declaring a property happens at the time of [class definition evaluation](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-runtime-semantics-classdefinitionevaluation). The process for executing a property's initializer happens at class instantiation time and depends on wether the class is a "base" class (AKA has no `extends` clause) or is a "child" class (AKA has an `extends` clause). The differences between these two cases is described above in [Property Declarations Without Initializers](#property-declarations-without-initializers) and [Property Declarations With Initializers](#property-declarations-with-initializers).
 
 The high level process for declaring class properties is as follows for each property in the order the properties are declared. (for sake of definition we assume a name for the class being defined is `DefinedClass`):
 
 1. If the property name is computed, evaluate the computed property expression to a string to conclude the name of the property.
-2. Create a function whose body simply executes the initializer expression and returns the result.
+2. Create a function whose body simply executes the initializer expression and returns the result. This function's parent scope should be set to the scope of the class body. To be super clear: This scope should sit sibling to the scope of any of the class's method bodies.
 3. If the `DefinedClass.prototype[Symbol.ClassProperties]` object is not already created, create and set it.
 4. On the `DefinedClass.prototype[Symbol.ClassProperties]` object, store the function generated in step 2 under the key matching the name of the property being evaluated.
 
 The purpose for generating and storing these "thunk" functions is a means of deferring the execution of the initialization expression until the class is constructed; Thus, the high level process for executing class property initializers is as follows -- once for each property in the order the properties are declared:
 
 1. For each entry on `DefinedClass.prototype[Symbol.ClassProperties]`, call the value as a function with a `this` value equal to the `this` value of the object being constructed.
-2. Store the result of the call in step 1 on the `this` object with the corresponding `DefinedClass.prototype[Symbol.ClassProperties]` entry key being evaluated currently.
-
-Note that the process of executing class properties depends on whether the class is a "base" class (AKA has no `extends` clause) or is a "derived" class (AKA has an `extends` clause). See [Declarations With Initializers](#declarations-with-initializers) for more details.
+2. Store the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.ClassProperties]` entry currently being evaluated.
 
 ##### Spec Text
 
