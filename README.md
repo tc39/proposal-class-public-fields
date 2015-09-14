@@ -2,7 +2,7 @@
 
 This concept is comprised of two separate (but related) proposals: "class instance" property initializers and "class static" property intializers.
 
-## ES Class Instance Properties (1/2)
+## Proposal 1/2: ES Class Instance Properties
 
 This is a proposal to include a declarative means of expressing instance properties on an ES class. These property declarations may include intializers, but are not required to do so.
 
@@ -66,7 +66,7 @@ When properties are specified declaratively, VMs have an opportunity to generate
 
 <<TODO>>
 
-## ES Class "Static" Properties (2/2)
+## Proposal 2/2: ES Class "Static" Properties
 
 This is a proposal very much related to the former, but is much simpler in scope (and thus is separated into a separate proposal for sake of simplicity). This proposal intends to include a declarative means of expressing "static" properties on an ES class. These property declarations may include intializers, but are not required to do so.
 
