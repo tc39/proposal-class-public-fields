@@ -98,17 +98,29 @@ The high level process for declaring class properties is as follows for each pro
 
 1. If the property name is computed, evaluate the computed property expression to a string to conclude the name of the property.
 2. Create a function whose body simply executes the initializer expression and returns the result. This function's parent scope should be set to the scope of the class body. To be super clear: This scope should sit sibling to the scope of any of the class's method bodies.
-3. If the `DefinedClass.prototype[Symbol.ClassProperties]` object is not already created, create and set it.
+3. If the `DefinedClass.prototype[Symbol.ClassProperties]` object is not already set, create and set it.
 4. On the `DefinedClass.prototype[Symbol.ClassProperties]` object, store the function generated in step 2 under the key matching the name of the property being evaluated.
 
 The purpose for generating and storing these "thunk" functions is a means of deferring the execution of the initialization expression until the class is constructed; Thus, the high level process for executing class property initializers is as follows -- once for each property in the order the properties are declared:
 
 1. For each entry on `DefinedClass.prototype[Symbol.ClassProperties]`, call the value as a function with a `this` value equal to the `this` value of the object being constructed.
-2. Store the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.ClassProperties]` entry currently being evaluated.
+2. Define the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.ClassProperties]` entry currently being evaluated. It should be defined with the following descriptor:
+
+```javascript
+{
+  configurable: true,
+  enumerable: true,
+  writable: true,
+  get: undefined,
+  set: undefined,
+}
+```
 
 ## Proposal 2/2: Class "Static" Properties
 
-This is a proposal very much related to the former, but is much simpler in scope (and thus is separated into a separate proposal for sake of simplicity). This proposal intends to include a declarative means of expressing "static" properties on an ES class. These property declarations may include intializers, but are not required to do so.
+(This is a proposal very much related to the former, but is much simpler in scope and is technically orthogonal -- so I've separated it for simplicity.)
+
+This second proposal intends to include a declarative means of expressing "static" properties on an ES class. These property declarations may include intializers, but are not required to do so.
 
 The proposed syntax for this is as follows:
 
@@ -124,11 +136,30 @@ class MyClass {
 
 ### Why?
 
-\<\<TODO>>
+Currently it's possible to express static methods on a class definition, but it is not possible to declaratively express static properties. As a result people generally have to assign static properties on a class after the class declaration -- which makes it very easy to miss the assignment as it does not appear as part of the definition.
 
 ### How?
 
-\<\<TODO>>
+Static property declarations are fairly straightforward in terms of semantics compared to their instance-property counter-parts. When a class definition is evaluated, the following set of operations is executed:
+
+1. If the property name is computed, evaluate the computed property expression to a string to conclude the name of the property.
+2. Create a function whose body simply executes the initializer expression and returns the result. This function's parent scope should be set to the scope of the class body. To be super clear: This scope should sit sibling to the scope of any of the class's method bodies.
+3. If the `ClassDefinition[Symbol.ClassProperties]` object is not already set, create and set it.
+4. On the `ClassDefinition[Symbol.ClassProperties]` object, store the function generated in step 2 under the key matching the same name of the property being evauated.
+5. Call the function defined in step 2 with a `this` value equal to the `this` value of the object being constructed.
+6. Define the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.ClassProperties]` entry currently being evaluated. It should be defined with the following descriptor:
+
+```javascript
+{
+  configurable: true,
+  enumerable: true,
+  writable: true,
+  get: undefined,
+  set: undefined,
+}
+```
+
+Note that we store the static property thunk functions on `ClassDefinition[Symbol.ClassProperties]` for purposes of allowing userland introspection of declared properties on a class.
 
 ## Spec Text
 
