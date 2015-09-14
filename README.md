@@ -64,7 +64,53 @@ When properties are specified declaratively, VMs have an opportunity to generate
 
 ### How?
 
-<<TODO>>
+(...starting with "plain english" and ending with spec text...)
+
+##### Proposed Syntax
+
+Instance property declarations may either specify an initializer or not:
+
+```javascript
+class ClassWithoutInits {
+  myProp;
+}
+
+class ClassWithInits {
+  myProp = 42;
+}
+```
+
+##### Declarations Without Initializers
+
+When no initializer is specified for a declared property, the property declaration will act as a no-op. This is useful for scenarios where initialization needs to happen somewhere other than in the initializer position (ex. If the property is or depends on constructor-injected data, or if the property is managed externally by something like a decorator/framework, etc). Additionally, it's useful for derived classes to "silently" specify a class property that may have been setup on a base class (either using or not using property declarations). For this reason, a declaration with no initializer should not attempt to zero-out data potentially written by a base class with something like `undefined` or `null`.
+
+##### Declarations With Initializers
+
+When a property with an initializer is specifed on a non-derived class (meaning a class without an `extends` clause), the initializers are declared and executed in the order they are specified in the internal "initialization" process that occurs immediately *before* entering the constructor.
+
+When an initializer is specified on a derived class (meaning a class with an `extends` clause), the initializers are declared and executed in the order they are specified at the end of the in the internal "initialization" process that occurs while executing `super()` in the derived constructor. This means that if a derived constructor never calls `super()`, instance properties specified on the derived class will not be initialized since property initialization is considered a part of the allocation process.
+
+##### Property Declaration & Execution
+
+The process of declaring a property happens at the time of class definition evaluation. The process for deciding when to execute a property's initializer is described above in [Declarations Without Initializers](#declarations-without-initializers) and [Declarations With Initializers](#declarations-with-initializers).
+
+The high level process for declaring class properties is as follows for each property in the order the properties are declared. (for sake of definition we assume a name for the class being defined is `DefinedClass`):
+
+1. If the property name is computed, evaluate the computed property expression to a string to conclude the name of the property.
+2. Create a function whose body simply executes the initializer expression and returns the result.
+3. If the `DefinedClass.prototype[Symbol.ClassProperties]` object is not already created, create and set it.
+4. On the `DefinedClass.prototype[Symbol.ClassProperties]` object, store the function generated in step 2 under the key matching the name of the property being evaluated.
+
+The purpose for generating and storing these "thunk" functions is a means of deferring the execution of the initialization expression until the class is constructed; Thus, the high level process for executing class property initializers is as follows -- once for each property in the order the properties are declared:
+
+1. For each entry on `DefinedClass.prototype[Symbol.ClassProperties]`, call the value as a function with a `this` value equal to the `this` value of the object being constructed.
+2. Store the result of the call in step 1 on the `this` object with the corresponding `DefinedClass.prototype[Symbol.ClassProperties]` entry key being evaluated currently.
+
+Note that the process of executing class properties depends on whether the class is a "base" class (AKA has no `extends` clause) or is a "derived" class (AKA has an `extends` clause). See [Declarations With Initializers](#declarations-with-initializers) for more details.
+
+##### Spec Text
+
+\<\<TODO>>
 
 ## Proposal 2/2: ES Class "Static" Properties
 
@@ -84,8 +130,8 @@ class MyClass {
 
 ### Why?
 
-<<TODO>>
+\<\<TODO>>
 
 ### How?
 
-<<TODO>>
+\<\<TODO>>
