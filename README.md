@@ -2,7 +2,7 @@
 
 This concept is comprised of two separate (but related) proposals: "class instance" property initializers and "class static" property intializers.
 
-## Proposal 1/2: ES Class Instance Properties
+## Proposal 1/2: Class Instance Properties
 
 This is a proposal to include a declarative means of expressing instance properties on an ES class. These property declarations may include intializers, but are not required to do so.
 
@@ -106,7 +106,7 @@ The purpose for generating and storing these "thunk" functions is a means of def
 1. For each entry on `DefinedClass.prototype[Symbol.ClassProperties]`, call the value as a function with a `this` value equal to the `this` value of the object being constructed.
 2. Store the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.ClassProperties]` entry currently being evaluated.
 
-## Proposal 2/2: ES Class "Static" Properties
+## Proposal 2/2: Class "Static" Properties
 
 This is a proposal very much related to the former, but is much simpler in scope (and thus is separated into a separate proposal for sake of simplicity). This proposal intends to include a declarative means of expressing "static" properties on an ES class. These property declarations may include intializers, but are not required to do so.
 
