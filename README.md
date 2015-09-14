@@ -64,8 +64,6 @@ When properties are specified declaratively, VMs have an opportunity to generate
 
 ### How?
 
-(...starting with "plain english" and ending with spec text...)
-
 ##### Proposed Syntax
 
 Instance property declarations may either specify an initializer or not:
