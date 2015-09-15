@@ -1,6 +1,6 @@
 # ES Class Properties
 
-This concept is comprised of two separate (but related) proposals: "class instance" property initializers and "class static" property intializers. "Instance" properties are set once per instiation of a class on the `this` value, and "static" properties are set on the class object itself.
+This presents two related proposals: "class instance" property initializers and "class static" property intializers. "Instance" properties exist once per instiation of a class on the `this` value, and "static" properties exist on the class object itself.
 
 ## Proposal 1/2: Class Instance Properties
 
