@@ -80,7 +80,7 @@ class ClassWithInits {
 
 ##### Instance Property Declarations Without Initializers
 
-When no initializer is specified for a declared property, the act of executing a property initializer will simply be a no-op. This is useful for scenarios where initialization needs to happen somewhere other than in the declarative init position (ex. If the property depends on constructor-injected data and thus needs to be initialized inside the construtor, or if the property is managed externally by something like a decorator or framework).
+When no initializer is specified for a declared property, the presence of the property will have no effect on any objects instantiated from the class. This is useful for scenarios where initialization needs to happen somewhere other than in the declarative initialization position (ex. If the property depends on constructor-injected data and thus needs to be initialized inside the construtor, or if the property is managed externally by something like a decorator or framework).
 
 Additionally, it's sometimes useful for derived classes to "silently" specify a class property that may have been setup on a base class (either using or not using property declarations). For this reason, a declaration with no initializer should not attempt to overwrite data potentially written by a base class.
 
@@ -253,7 +253,7 @@ _ClassElementList_ : _ClassElementList_ _ClassElement_
   2. **TODO: If HasRHSExpression of _i_, then**
     1. **TODO: Let _initFunc_ be a function with an outer environment set to that of the class body that returns the result of executing the RHS expression**
   3. **Else,**
-    1. **TODO: Let _initFunc_ be null**
+    1. **Let _initFunc_ be null**
   4. **If IsStatic of _i_ is false, then**
     1. **TODO: Let _propertyStore_ be GetClassPropertyStore of _proto_**
     2. **TODO: Object.defineProperty(_propertyStore_, _propName_, {configurable: true, enumerable: true, writable: true, value: _initFunc_})**
