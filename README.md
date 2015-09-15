@@ -52,7 +52,7 @@ class ReactCounter extends React.Component {
 }
 ```
 
-Additionally, static analysis tools like Flow, TypeScript, ESLint, and likely many others can take advantage of the explicit declarations (along with additional metadata like typehints or JSDoc pragmas) to warn about typos or mistakes in code if the user declaratively calls out the shape of the class.
+Additionally, static analysis tools like Flow, TypeScript, ESLint, and many others can take advantage of the explicit declarations (along with additional metadata like typehints or JSDoc pragmas) to warn about typos or mistakes in code if the user declaratively calls out the shape of the class.
 
 ##### Decorators for Non-Method Class Members
 
