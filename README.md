@@ -261,7 +261,7 @@ _ClassElementList_ : _ClassElementList_ _ClassElement_
     1. **TODO: Let _propertyStore_ be GetClassPropertyStore of _F_**
     2. **TODO: Object.defineProperty(_propertyStore_, _propName_, {configurable: true, enumerable: true, writable: true, value: _initFunc_})**
     3. **TODO: If HasRHSInitializer of _i_ is true, then**
-      1. Let _propValue_ be the result of calling _initFunc_
+      1. **Let _propValue_ be the result of calling _initFunc_**
       2. **TODO: Object.defineProperty(_F_, _propName_, {configurable: true, enumerable: true, writable: true, value: _propValue})**
 25. Set the running execution context’s LexicalEnvironment to _lex_.
 26. If _className_ is not undefined, then
