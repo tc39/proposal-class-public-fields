@@ -103,7 +103,7 @@ The purpose for generating and storing these "thunk" functions is a means of def
 
 ##### Instance Property Initialization Process
 
-The process for executing a property initializers happens at class instantiation time and depends on wether the class is a "base" class (AKA has no `extends` clause) or is a "derived" class (AKA has an `extends` clause). The differences between these two cases is described above in [Property Declarations Without Initializers](#property-declarations-without-initializers) and [Property Declarations With Initializers](#property-declarations-with-initializers). The following describes the process for initializing each class property initializer (intended to run once for each property in the order the properties are declared):
+The process for executing a property initializer happens at class instantiation time. The following describes the process for initializing each class property initializer (intended to run once for each property in the order the properties are declared):
 
 1. For each entry on `DefinedClass.prototype[Symbol.ClassProperties]`, call the value as a function with a `this` value equal to the `this` value of the object being constructed.
 2. Define the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.ClassProperties]` entry currently being evaluated. It should be defined with the following descriptor:
