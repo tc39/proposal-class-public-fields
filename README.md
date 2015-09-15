@@ -195,7 +195,7 @@ _ClassElementList_ : _ClassElementList_ _ClassElement_
 3. If _ClassElement_ is the production _ClassElement_ : `static` _ClassPropertyInitializer_, append _ClassElement_ to the end of _list_.
 4. Return _list_.
 
-#### [14.5.14 Runtime Semantics: ClassDefinitionEvaluation](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-runtime-semantics-classdefinitionevaluation)
+##### [14.5.14 Runtime Semantics: ClassDefinitionEvaluation](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-runtime-semantics-classdefinitionevaluation)
 
 1. Let _lex_ be the LexicalEnvironment of the running execution context.
 2. Let _classScope_ be NewDeclarativeEnvironment(_lex_).
@@ -268,7 +268,7 @@ _ClassElementList_ : _ClassElementList_ _ClassElement_
   1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
 27. Return _F_.
 
-#### [9.2.2 \[\[Construct\]\] ( argumentsList, newTarget ) ](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-ecmascript-function-objects-construct-argumentslist-newtarget)
+##### [9.2.2 \[\[Construct\]\] ( argumentsList, newTarget ) ](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-ecmascript-function-objects-construct-argumentslist-newtarget)
 
 The [[Construct]] internal method for an ECMAScript Function object _F_ is called with parameters _argumentsList_ and _newTarget_. _argumentsList_ is a possibly empty List of ECMAScript language values. The following steps are taken:
 
@@ -301,3 +301,27 @@ The [[Construct]] internal method for an ECMAScript Function object _F_ is calle
   3. If _result_.[[value]] is not undefined, throw a TypeError exception.
 14. Else, ReturnIfAbrupt(_result_).
 15. Return _envRec_.GetThisBinding().
+
+##### [12.3.5.1 Runtime Semantics: Evaluation (SuperCall)](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-super-keyword-runtime-semantics-evaluation)
+
+_SuperCall_ : `super` _Arguments_
+
+1. Let _newTarget_ be GetNewTarget().
+2. If _newTarget_ is undefined, throw a ReferenceError exception.
+3. Let _func_ be GetSuperConstructor().
+4. ReturnIfAbrupt(_func_).
+5. Let _argList_ be ArgumentListEvaluation of Arguments.
+6. ReturnIfAbrupt(_argList_).
+7. **Let _constructResult_ be Construct(_func_, _argList_, _newTarget_).**
+8. ReturnIfAbrupt(_constructResult_).
+9. Let _thisER_ be GetThisEnvironment( ).
+10. **Let _bindThisResult_ _thisER_.BindThisValue(_constructResult_).**
+11. **TODO: Let _propInits_ be the result of GetClassPropertyStore of _thisER_.[[FunctionObject]].**
+12. **TODO: For each _propInitKeyValuePair_ from _propInits_**.
+  1. **Let _propName_ be the first element of _propInitKeyValuePair_**
+  2. **Let _propInitFunc_ be the second element of _propInitKeyValuePair_**
+  3. **If _propInitFunc_ is not `null`, then**
+    1. **TODO: Let _propValue_ be the result of executing _propInitFunc_ with a `this` of _thisArgument_.**
+    2. **TODO: Let _success_ be the result of \[\[Set]](_propName_, _propValue_, _thisArgument_).**
+    3. **TODO: ReturnIfArupt(_success_)**
+13. **Return _bindThisResult_**
