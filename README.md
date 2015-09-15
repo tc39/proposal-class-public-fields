@@ -267,3 +267,37 @@ _ClassElementList_ : _ClassElementList_ _ClassElement_
 26. If _className_ is not undefined, then
   1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
 27. Return _F_.
+
+#### [9.2.2 \[\[Construct\]\] ( argumentsList, newTarget ) ](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-ecmascript-function-objects-construct-argumentslist-newtarget)
+
+The [[Construct]] internal method for an ECMAScript Function object _F_ is called with parameters _argumentsList_ and _newTarget_. _argumentsList_ is a possibly empty List of ECMAScript language values. The following steps are taken:
+
+1. Assert: _F_ is an ECMAScript function object.
+2. Assert: Type(_newTarget_) is Object.
+3. Let _callerContext_ be the running execution context.
+4. Let _kind_ be _F_’s [[ConstructorKind]] internal slot.
+5. If _kind_ is "base", then
+  1. Let _thisArgument_ be OrdinaryCreateFromConstructor(_newTarget_, "%ObjectPrototype%").
+  2. ReturnIfAbrupt(_thisArgument_).
+6. Let _calleeContext_ be PrepareForOrdinaryCall(_F_, _newTarget_).
+7. Assert: _calleeContext_ is now the running execution context.\
+8. If _kind_ is "base", then
+  1. **TODO: Let _propInits_ be the result of GetClassPropertyStore of _F_.prototype**.
+  2. **TODO: For each _propInitKeyValuePair_ from _propInits_**.
+    1. **Let _propName_ be the first element of _propInitKeyValuePair_**
+    2. **Let _propInitFunc_ be the second element of _propInitKeyValuePair_**
+    2. **If _propInitFunc_ is not `null`, then**
+      1. **TODO: Let _propValue_ be the result of executing _propInitFunc_ with a `this` of _thisArgument_.**
+      2. **TODO: Let _success_ be the result of \[\[Set]](_propName_, _propValue_, _thisArgument_).**
+      3. **TODO: ReturnIfArupt(_success_)**
+  2. Perform OrdinaryCallBindThis(_F_, _calleeContext_, _thisArgument_).
+9. Let _constructorEnv_ be the LexicalEnvironment of _calleeContext_.
+10. Let _envRec_ be _constructorEnv_’s environment record.
+11. Let _result_ be OrdinaryCallEvaluateBody(_F_, _argumentsList_).
+12. Remove _calleeContext_ from the execution context stack and restore _callerContext_ as the running execution context.
+13. If _result_.[[type]] is return, then
+  1. If Type(_result_.[[value]]) is Object, return NormalCompletion(_result_.[[value]]).
+  2. If _kind_ is "base", return NormalCompletion(_thisArgument_).
+  3. If _result_.[[value]] is not undefined, throw a TypeError exception.
+14. Else, ReturnIfAbrupt(_result_).
+15. Return _envRec_.GetThisBinding().
