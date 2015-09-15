@@ -52,8 +52,8 @@ The process of declaring a property happens at the time of [class definition eva
 
 1. If the property name is computed, evaluate the computed property expression to a string to conclude the name of the property.
 2. Create a function whose body simply executes the initializer expression and returns the result. This function's parent scope should be set to the scope of the class body. To be super clear: This scope should sit sibling to the scope of any of the class's method bodies.
-3. If the `DefinedClass.prototype[Symbol.ClassProperties]` object is not already set, create and set it.
-4. On the `DefinedClass.prototype[Symbol.ClassProperties]` object, store the function generated in step 2 under the key matching the name of the property being evaluated.
+3. If the `DefinedClass.prototype[Symbol.classProperties]` object is not already set, create and set it.
+4. On the `DefinedClass.prototype[Symbol.classProperties]` object, store the function generated in step 2 under the key matching the name of the property being evaluated.
 
 The purpose for generating and storing these "thunk" functions is a means of deferring the execution of the initialization expression until the class is constructed; Thus, 
 
@@ -61,8 +61,8 @@ The purpose for generating and storing these "thunk" functions is a means of def
 
 The process for executing a property initializer happens at class instantiation time. The following describes the process for initializing each class property initializer (intended to run once for each property in the order the properties are declared):
 
-1. For each entry on `DefinedClass.prototype[Symbol.ClassProperties]`, call the value as a function with a `this` value equal to the `this` value of the object being constructed.
-2. Define the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.ClassProperties]` entry currently being evaluated. It should be defined with the following descriptor:
+1. For each entry on `DefinedClass.prototype[Symbol.classProperties]`, call the value as a function with a `this` value equal to the `this` value of the object being constructed.
+2. Define the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.classProperties]` entry currently being evaluated. It should be defined with the following descriptor:
 
 ```javascript
 {
@@ -142,8 +142,8 @@ Static property declarations are fairly straightforward in terms of semantics co
 
 1. If the property name is computed, evaluate the computed property expression to a string to conclude the name of the property.
 2. Create a function whose body simply executes the initializer expression and returns the result. This function's parent scope should be set to the scope of the class body. To be super clear: This scope should sit sibling to the scope of any of the class's method bodies.
-3. If the `ClassDefinition[Symbol.ClassProperties]` object is not already set, create and set it.
-4. On the `ClassDefinition[Symbol.ClassProperties]` object, store the function generated in step 2 under the key matching the same name of the property being evauated.
+3. If the `ClassDefinition[Symbol.classProperties]` object is not already set, create and set it.
+4. On the `ClassDefinition[Symbol.classProperties]` object, store the function generated in step 2 under the key matching the same name of the property being evauated.
 5. Call the function defined in step 2 with a `this` value equal to the `this` value of the object being constructed.
 6. Define the result of the call in step 5 as a property on the `this` object with a key corresponding to the name of the property currently being evaluated. It should be defined with the following descriptor:
 
@@ -157,7 +157,7 @@ Static property declarations are fairly straightforward in terms of semantics co
 }
 ```
 
-Note that we store the static property thunk functions on `ClassDefinition[Symbol.ClassProperties]` for purposes of userland reflection on how the class was declared.
+Note that we store the static property thunk functions on `ClassDefinition[Symbol.classProperties]` for purposes of userland reflection on how the class was declared.
 
 ### Why?
 
