@@ -92,7 +92,7 @@ When an initializer is specified on a **derived class (AKA a class with an `exte
 
 ##### Property Declaration & Execution Process
 
-The process of declaring a property happens at the time of [class definition evaluation](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-runtime-semantics-classdefinitionevaluation). The process for executing a property's initializer happens at class instantiation time and depends on wether the class is a "base" class (AKA has no `extends` clause) or is a "child" class (AKA has an `extends` clause). The differences between these two cases is described above in [Property Declarations Without Initializers](#property-declarations-without-initializers) and [Property Declarations With Initializers](#property-declarations-with-initializers).
+The process of declaring a property happens at the time of [class definition evaluation](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-runtime-semantics-classdefinitionevaluation). The process for executing a property's initializer happens at class instantiation time and depends on wether the class is a "base" class (AKA has no `extends` clause) or is a "derived" class (AKA has an `extends` clause). The differences between these two cases is described above in [Property Declarations Without Initializers](#property-declarations-without-initializers) and [Property Declarations With Initializers](#property-declarations-with-initializers).
 
 The high level process for declaring class properties is as follows for each property in the order the properties are declared. (for sake of definition we assume a name for the class being defined is `DefinedClass`):
 
