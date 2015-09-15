@@ -80,7 +80,7 @@ class ClassWithInits {
 
 ##### Property Declarations Without Initializers
 
-When no initializer is specified for a declared property, the property declaration will act as a no-op. This is useful for scenarios where initialization needs to happen somewhere other than in the initializer position (ex. If the property depends on constructor-injected data and thus needs to be initialized inside the construtor, or if the property is managed externally by something like a decorator or framework).
+When no initializer is specified for a declared property, the act of executing a property initializer will simply be a no-op. This is useful for scenarios where initialization needs to happen somewhere other than in the declarative init position (ex. If the property depends on constructor-injected data and thus needs to be initialized inside the construtor, or if the property is managed externally by something like a decorator or framework).
 
 Additionally, it's sometimes useful for derived classes to "silently" specify a class property that may have been setup on a base class (either using or not using property declarations). For this reason, a declaration with no initializer should not attempt to overwrite data potentially written by a base class.
 
