@@ -147,7 +147,7 @@ Static property declarations are fairly straightforward in terms of semantics co
 3. If the `ClassDefinition[Symbol.ClassProperties]` object is not already set, create and set it.
 4. On the `ClassDefinition[Symbol.ClassProperties]` object, store the function generated in step 2 under the key matching the same name of the property being evauated.
 5. Call the function defined in step 2 with a `this` value equal to the `this` value of the object being constructed.
-6. Define the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.ClassProperties]` entry currently being evaluated. It should be defined with the following descriptor:
+6. Define the result of the call in step 5 as a property on the `this` object with a key corresponding to the name of the property currently being evaluated. It should be defined with the following descriptor:
 
 ```javascript
 {
@@ -159,7 +159,7 @@ Static property declarations are fairly straightforward in terms of semantics co
 }
 ```
 
-Note that we store the static property thunk functions on `ClassDefinition[Symbol.ClassProperties]` for purposes of allowing userland introspection of declared properties on a class.
+Note that we store the static property thunk functions on `ClassDefinition[Symbol.ClassProperties]` for purposes of userland reflection on how the class was declared.
 
 ## Spec Text
 
