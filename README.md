@@ -22,7 +22,7 @@ class MyClass {
 
 ##### Expressiveness & Boilerplate
 
-The current idiomatic means of initializing a property on a class instance does not provide an expressively distinct way to "declare" them as part of the structure of a class. Specifically, in order to create a class property today one must assign to an expando on `this` in the constructor. This poses an inconvenience to tooling (and also sometimes humans) when trying to deduce the intended set of members for a class simply because there is no clear distinction between initialization logic and the intended shape of the class.
+The current idiomatic means of initializing a property on a class instance does not provide an expressively distinct way to "declare" them as part of the structure of a class. In order to create a class property today one must assign to an expando property on `this` in the constructor -- or anywhere, really. This poses an inconvenience to tooling (and also sometimes humans) when trying to deduce the *intended* set of members for a class simply because there is no clear distinction between initialization logic and the intended shape of the class.
 
 Additionally, because properties often need to be setup during class construction for object initialization, derived classes that wish to declare/initialize their own properties must implement some boilerplate to execute base class initialization first:
 
@@ -39,7 +39,7 @@ class ReactCounter extends React.Component {
 }
 ```
 
-By allowing explicit and syntactically distinct instance property declarations, it becomes possible for tools and documentation to easily extract the intended shape of the class. Additionally it becomes possible for derived classes to specify non-constructor-dependent property initialization without having to explicitly intercept the constructor chain (write a constructor, call `super()`, etc).
+By allowing explicit and syntactically distinct property declarations, it becomes possible for tools and documentation to easily extract the intended shape of a class and it's objects. Additionally it becomes possible for derived classes to specify non-constructor-dependent property initialization without having to explicitly intercept the constructor chain (write a constructor, call `super()`, etc).
 
 Initialization situations like the following are common in many pervasive frameworks like React, Ember, Backbone, etc. as well as even just "vanilla" application code:
 
