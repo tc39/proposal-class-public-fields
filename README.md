@@ -55,6 +55,8 @@ The process of declaring a property happens at the time of [class definition eva
 3. If the `DefinedClass.prototype[Symbol.classProperties]` object is not already set, create and set it.
 4. On the `DefinedClass.prototype[Symbol.classProperties]` object, store the function generated in step 2 under the key matching the name of the property being evaluated.
 
+Note that declared instance properties are wrapped in a function and stored on `DefinedClass.prototype[Symbol.classProperties]` for purposes of userland introspection. This also means that it is possible to modify a previously declared class's properties by modifying `DefinedClass.prototype[Symbol.classProperties]` in userland. The ability to introspect and interact with a class definition is important for meta-programming libraries including some frameworks and testing utilities.
+
 The purpose for generating and storing these "thunk" functions is a means of deferring the execution of the initialization expression until the class is constructed; Thus, 
 
 ##### Instance Property Initialization Process
