@@ -34,19 +34,15 @@ class ClassWithInits {
 }
 ```
 
-##### Instance Property Declarations Without Initializers
+##### Instance Property Declaration Process
 
-When no initializer is specified for a declared property, the presence of the property will have no effect on any objects instantiated from the class. This is useful for scenarios where initialization needs to happen somewhere other than in the declarative initialization position (ex. If the property depends on constructor-injected data and thus needs to be initialized inside the construtor, or if the property is managed externally by something like a decorator or framework).
+When a property is specified **with no initializer**, the presence of the property will have no effect on any objects instantiated from the class. This is useful for scenarios where initialization needs to happen somewhere other than in the declarative initialization position (ex. If the property depends on constructor-injected data and thus needs to be initialized inside the construtor, or if the property is managed externally by something like a decorator or framework).
 
 Additionally, it's sometimes useful for derived classes to "silently" specify a class property that may have been setup on a base class (either using or not using property declarations). For this reason, a declaration with no initializer should not attempt to overwrite data potentially written by a base class.
 
-##### Instance Property Declarations With Initializers
+When a property **with an initializer** is specifed on a **non-derived class (AKA a class without an `extends` clause)**, the initializers are declared and executed in the order they are specified in the class definition. Execution of the initializers happens during the internal "initialization" process that occurs immediately *before* entering the constructor.
 
-When a property with an initializer is specifed on a **non-derived class (AKA a class without an `extends` clause)**, the initializers are declared and executed in the order they are specified in the class definition. Execution of the initializers happens during the internal "initialization" process that occurs immediately *before* entering the constructor.
-
-When an initializer is specified on a **derived class (AKA a class with an `extends` clause)**, the initializers are declared and executed in the order they are specified in the class definition. Execution of the initializers happens at the end of the internal "initialization" process that occurs while executing `super()` in the derived constructor. This means that if a derived constructor never calls `super()`, instance properties specified on the derived class will not be initialized since property initialization is considered a part of the [SuperCall Evaluation process](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-super-keyword-runtime-semantics-evaluation).
-
-##### Instance Property Declaration Process
+When a property **with an initializer** is specified on a **derived class (AKA a class with an `extends` clause)**, the initializers are declared and executed in the order they are specified in the class definition. Execution of the initializers happens at the end of the internal "initialization" process that occurs while executing `super()` in the derived constructor. This means that if a derived constructor never calls `super()`, instance properties specified on the derived class will not be initialized since property initialization is considered a part of the [SuperCall Evaluation process](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-super-keyword-runtime-semantics-evaluation).
 
 The process of declaring a property happens at the time of [class definition evaluation](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-runtime-semantics-classdefinitionevaluation). This process is roughly defined as follows for each property in the order the properties are declared. (for sake of definition we assume a name for the class being defined is `DefinedClass`):
 
