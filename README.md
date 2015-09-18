@@ -69,6 +69,7 @@ The process for executing a property initializer happens at class instantiation 
   writable: true,
   get: undefined,
   set: undefined,
+  value: <<initializer result from step 1>>,
 }
 ```
 
@@ -152,6 +153,7 @@ Static property declarations are fairly straightforward in terms of semantics co
   writable: true,
   get: undefined,
   set: undefined,
+  value: <<initializer result from step 1>>,
 }
 ```
 
