@@ -130,7 +130,7 @@ class MyClass {
   static myStaticProp = 42;
   
   constructor() {
-    console.log(MyClass.myProp); // Prints '42'
+    console.log(MyClass.myStaticProp); // Prints '42'
   }
 }
 ```
