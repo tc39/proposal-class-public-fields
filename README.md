@@ -102,7 +102,7 @@ Initialization situations like the following are common in many pervasive framew
 class ReactCounter extends React.Component {
   // Freshly-built counters should always start at zero!
   state = {
-    count: 0;
+    count: 0
   };
 }
 ```
