@@ -90,7 +90,7 @@ The process for executing a field initializer happens at class instantiation tim
 2. Let _fieldName_ be the name for the current field (as stored in the slot on the constructor function).
 3. Let _fieldInitializerExpression_ be the thunked initializer expression for the current field (as stored in the slot on the constructor function).
 4. Let _initializerResult_ be the result of evaluating _fieldInitializerExpression_ with `this` equal to _instance_.
-5. Let _propertyDescriptor_ be PropertyDescriptor{\[\[Value]]: _initializerResult_, \[\[Writable]]: true, \[\[Enumerable]]: true, \[\[Configurable]]: true}.
+5. Let _propertyDescriptor_ be PropertyDescriptor{\[\[Value]]: _initializerResult_, \[\[Writable]]: true, \[\[Enumerable]]: true, \[\[Configurable]]: false}.
 6. Call _instance_.\[\[DefineOwnProperty]](_fieldName_, _propertyDescriptor_).
 
 ### Why?
@@ -165,7 +165,7 @@ Static property declarations are fairly straightforward in terms of semantics co
     1. Let _initializerValue_ be the result of evaluating the initializer expression.
 4. Else,
     1. Let _initializerValue_ be the result of \[\[Get]](_propName_, _F_)
-5. Let _propertyDescriptor_ be PropertyDescriptor{\[\[Value]]: _initializerValue_, \[\[Writable]]: true, \[\[Enumerable]]: true, \[\[Configurable]]: true}.
+5. Let _propertyDescriptor_ be PropertyDescriptor{\[\[Value]]: _initializerValue_, \[\[Writable]]: true, \[\[Enumerable]]: true, \[\[Configurable]]: false}.
 6. Call _F_.\[\[DefineOwnProperty]](_propName_, _propertyDescriptor_).
 
 ### Why?
@@ -267,13 +267,13 @@ _ClassElementList_ : _ClassElementList_ _ClassElement_
         1. **Let _initFunc_ be null**
     4. **If IsStatic of _i_ is false, then**
         1. **TODO: Let _propertyStore_ be GetClassPropertyStore of _proto_**
-        2. **TODO: Object.defineProperty(_propertyStore_, _propName_, {configurable: true, enumerable: true, writable: true, value: _initFunc_})**
+        2. **TODO: Object.defineProperty(_propertyStore_, _propName_, {configurable: false, enumerable: true, writable: true, value: _initFunc_})**
     5. **Else,**
         1. **TODO: Let _propertyStore_ be GetClassPropertyStore of _F_**
-        2. **TODO: Object.defineProperty(_propertyStore_, _propName_, {configurable: true, enumerable: true, writable: true, value: _initFunc_})**
+        2. **TODO: Object.defineProperty(_propertyStore_, _propName_, {configurable: false, enumerable: true, writable: true, value: _initFunc_})**
         3. **TODO: If HasRHSInitializer of _i_ is true, then**
             1. **Let _propValue_ be the result of calling _initFunc_**
-            2. **TODO: Object.defineProperty(_F_, _propName_, {configurable: true, enumerable: true, writable: true, value: _propValue})**
+            2. **TODO: Object.defineProperty(_F_, _propName_, {configurable: false, enumerable: true, writable: true, value: _propValue})**
 25. Set the running execution context’s LexicalEnvironment to _lex_.
 26. If _className_ is not undefined, then
   1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
