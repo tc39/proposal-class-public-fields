@@ -1,10 +1,10 @@
-# ES Class Properties
+# ES Class Fields & Static Properties
 
-This presents two related proposals: "class instance" property initializers and "class static" property intializers. "Instance" properties exist once per instiation of a class on the `this` value, and "static" properties exist on the class object itself.
+This presents two related proposals: "class instance fields" and "class static properties". "Class instance fields" describe properties intended to exist on instances of a class (and may optionally include initializer expressions for said properties). "Class static properties" are declarative properties that exist on the class object itself (and may optionally include initializer expressions for said properties).
 
-## Proposal 1/2: Class Instance Properties
+## Part 1: Class Instance Fields
 
-This is a proposal to include a declarative means of expressing instance properties on an ES class. These property declarations may include intializers, but are not required to do so.
+The first part of this proposal is to include a means of declaring fields for instances of an ES class. These field declarations may include intializers, but are not required to do so.
 
 The proposed syntax for this is as follows:
 
@@ -22,7 +22,7 @@ class MyClass {
 
 ##### Proposed Syntax
 
-Instance property declarations may either specify an initializer or not:
+Instance field declarations may either specify an initializer or not:
 
 ```javascript
 class ClassWithoutInits {
@@ -34,52 +34,72 @@ class ClassWithInits {
 }
 ```
 
-##### Instance Property Declaration Process
+##### Instance Field Declaration Process
 
-When a property is specified **with no initializer**, the presence of the property will have no effect on any objects instantiated from the class. This is useful for scenarios where initialization needs to happen somewhere other than in the declarative initialization position (ex. If the property depends on constructor-injected data and thus needs to be initialized inside the construtor, or if the property is managed externally by something like a decorator or framework).
+When an instance field is specified **with no initializer**, the presence of the field declaration will have the effect of doing `Object.defineProperty(this, propName, { [...] value: this.prop})` on the constructed object (potentially reading through a prototype chain on the RHS via \[\[Get]]). The ability to leave off an initializer is important for scenarios where initialization needs to happen somewhere other than in the declarative initialization position (ex. If the property depends on constructor-injected data and thus needs to be initialized inside the construtor, or if the property is managed externally by something like a decorator or framework). And the reason we copy the \[\[Get]] result into an own-property is to ensure that any changes to objects that sit in the prototype chain (such as, perhaps, a method by the same name) do not change the declared-field properties on the instance.
 
-Additionally, it's sometimes useful for derived classes to "silently" specify a class property that may have been setup on a base class (either using or not using property declarations). For this reason, a declaration with no initializer should not attempt to overwrite data potentially written by a base class.
-
-When a property **with an initializer** is specifed on a **non-derived class (AKA a class without an `extends` clause)**, the initializers are declared and executed in the order they are specified in the class definition. Execution of the initializers happens during the internal "initialization" process that occurs immediately *before* entering the constructor.
-
-When a property **with an initializer** is specified on a **derived class (AKA a class with an `extends` clause)**, the initializers are declared and executed in the order they are specified in the class definition. Execution of the initializers happens at the end of the internal "initialization" process that occurs while executing `super()` in the derived constructor. This means that if a derived constructor never calls `super()`, instance properties specified on the derived class will not be initialized since property initialization is considered a part of the [SuperCall Evaluation process](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-super-keyword-runtime-semantics-evaluation).
-
-The process of declaring a property happens at the time of [class definition evaluation](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-runtime-semantics-classdefinitionevaluation). This process is roughly defined as follows for each property in the order the properties are declared. (for sake of definition we assume a name for the class being defined is `DefinedClass`):
-
-1. If the property name is computed, evaluate the computed property expression to a string to conclude the name of the property.
-2. Create a function whose body simply executes the initializer expression and returns the result. This function's parent scope should be set to the scope of the class body. To be super clear: This scope should sit sibling to the scope of any of the class's method bodies.
-3. If the `DefinedClass.prototype[Symbol.classProperties]` object is not already set, create and set it.
-4. On the `DefinedClass.prototype[Symbol.classProperties]` object, store the function generated in step 2 under the key matching the name of the property being evaluated.
-
-Note that declared instance properties are wrapped in a function and stored on `DefinedClass.prototype[Symbol.classProperties]` for purposes of userland introspection. This also means that it is possible to modify a previously declared class's properties by modifying `DefinedClass.prototype[Symbol.classProperties]` in userland. The ability to introspect and interact with a class definition is important for meta-programming libraries including some frameworks and testing utilities.
-
-The purpose for generating and storing these "thunk" functions is a means of deferring the execution of the initialization expression until the class is constructed; Thus, 
-
-##### Instance Property Initialization Process
-
-The process for executing a property initializer happens at class instantiation time. The following describes the process for initializing each class property initializer (intended to run once for each property in the order the properties are declared):
-
-1. For each entry on `DefinedClass.prototype[Symbol.classProperties]`, call the value as a function with a `this` value equal to the `this` value of the object being constructed.
-2. Define the result of the call in step 1 as a property on the `this` object with a key corresponding to the key of the `DefinedClass.prototype[Symbol.classProperties]` entry currently being evaluated. It should be defined with the following descriptor:
+For example:
 
 ```javascript
-{
-  configurable: true,
-  enumerable: true,
-  writable: true,
-  get: undefined,
-  set: undefined,
-  value: <<initializer result from step 1>>,
+class Base {
+  initialized() { return 'base initialized'; }
+  uninitialized() { return 'base uninitialized'; }
 }
+
+class Child extends Base {
+  initialized = () => 'child initialized';
+  uninitialized;
+}
+
+var child = new Child();
+child.initialized(); // 'child initialized'
+child.uninitialized(); // 'base uninitialized'
+
+Base.prototype.initialized = () => 'new base initialized';
+Base.prototype.uninitialized = () => 'new base uninitialized';
+
+child.initialized(); // Remains 'child initialized'
+child.uninitialized(); // Remains 'base uninitialized'
 ```
+
+Additionally, it's sometimes useful for derived classes to "silently" specify a class field that may have been setup on a base class (perhaps using field declarations). For this reason, writing `null` or `undefined` and potentially overwriting data written by a parent class cannot happen.
+
+When an instance field **with an initializer** is specifed on a **non-derived class (AKA a class without an `extends` clause)**, the list of fields (each comprised of a name and an initializer expression) are stored in a slot on the class object in the order they are specified in the class definition. Execution of the initializers happens during the internal "initialization" process that occurs immediately *before* entering the constructor.
+
+When an instance field **with an initializer** is specified on a **derived class (AKA a class with an `extends` clause)**, the list of fields (each comprised of a name and an initializer expression) are stored in a slot on the class object in the order they are specified in the class definition. Execution of the initializers happens at the end of the internal "initialization" process that occurs while executing `super()` in the derived constructor. This means that if a derived constructor never calls `super()`, instance fields specified on the derived class will not be initialized since property initialization is considered a part of the [SuperCall Evaluation process](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-super-keyword-runtime-semantics-evaluation).
+
+During the process of executing field initializers at construction time, field initializations happen **in the order the fields were declared on the class.**
+
+The process of declaring instance fields on a class happens at the time of [class definition evaluation](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-runtime-semantics-classdefinitionevaluation). This process is roughly defined as follows for each field in the order the fields are declared:
+
+1. Let _F_ be the class object being defined.
+2. Let _fieldName_ be the result of evaluating the field name expression to a string (i.e. potentially a computed property).
+2. If an initializer expression is present on the field declaration
+  1. Let _fieldInitializerExpression_ be a thunk of the initializer expression.
+4. Else,
+  1. Let _fieldInitializerExpression_ be a thunk of the expression represented by \[\[Get]](_fieldName_, _this_)
+5. Call _F_.\[\[SetClassInstanceField]](fieldName, fieldInitializerExpression) to store the field name + initializer on the constructor.
+
+Note that the purpose for storing the initializer expressions as a thunk is to allow the deferred execution of the initialization expression until class construction time; Thus, 
+
+##### Instance Field Initialization Process
+
+The process for executing a field initializer happens at class instantiation time. The following describes the process for initializing each class field initializer (intended to run once for each field in the order they are declared):
+
+1. Let _instance_ be the object being instantiated.
+2. Let _fieldName_ be the string name for the current field (as stored in the slot on the constructor function).
+3. Let _fieldInitializerExpression_ be the thunked initializer expression for the current field (as stored in the slot on the constructor function).
+4. Let _initializerResult_ be the result of evaluating _fieldInitializerExpression_ with `this` equal to _instance_.
+5. Let _propertyDescriptor_ be PropertyDescriptor{\[\[Value]]: _initializerResult_, \[\[Writable]]: true, \[\[Enumerable]]: true, \[\[Configurable]]: true}.
+6. Call _instance_.\[\[DefineOwnProperty]](_fieldName_, _propertyDescriptor_).
 
 ### Why?
 
 ##### Expressiveness & Boilerplate
 
-The current idiomatic means of initializing a property on a class instance does not provide an expressively distinct way to "declare" them as part of the structure of a class. In order to create a class property today one must assign to an expando property on `this` in the constructor -- or anywhere, really. This poses an inconvenience to tooling (and also sometimes humans) when trying to deduce the *intended* set of members for a class simply because there is no clear distinction between initialization logic and the intended shape of the class.
+The current idiomatic means of initializing a property on a class instance does not provide an expressively distinct way to "declare" them as part of the structure of a class. One must assign to an expando property on `this` in the constructor -- or anywhere, really. This poses an inconvenience to tooling (and also often humans) when trying to deduce the *intended* set of members for a class simply because there is no clear distinction between initialization logic and the intended shape of the class.
 
-Additionally, because properties often need to be setup during class construction for object initialization, derived classes that wish to declare/initialize their own properties must implement some boilerplate to execute base class initialization first:
+Additionally, because instance-generated properties often need to be setup during class construction for object initialization, derived classes that wish to declare/initialize their own properties must implement some boilerplate to execute base class initialization first:
 
 ```javascript
 class ReactCounter extends React.Component {
@@ -94,9 +114,9 @@ class ReactCounter extends React.Component {
 }
 ```
 
-By allowing explicit and syntactically distinct property declarations, it becomes possible for tools and documentation to easily extract the intended shape of a class and it's objects. Additionally it becomes possible for derived classes to specify non-constructor-dependent property initialization without having to explicitly intercept the constructor chain (write a constructor, call `super()`, etc).
+By allowing explicit and syntactically distinct field declarations it becomes possible for tools, documentation, and runtimes to easily extract the intended shape of a class and it's objects. Additionally it becomes possible for derived classes to specify non-constructor-dependent property initialization without having to explicitly intercept the constructor chain (write an override constructor, call `super()`, etc).
 
-Initialization situations like the following are common in many pervasive frameworks like React, Ember, Backbone, etc. as well as even just "vanilla" application code:
+Initialization situations like the following are common in many pervasive frameworks like React, Ember, Backbone, etc. as well as "vanilla" application code:
 
 ```javascript
 class ReactCounter extends React.Component {
@@ -109,19 +129,19 @@ class ReactCounter extends React.Component {
 
 Additionally, static analysis tools like Flow, TypeScript, ESLint, and many others can take advantage of the explicit declarations (along with additional metadata like typehints or JSDoc pragmas) to warn about typos or mistakes in code if the user declaratively calls out the shape of the class.
 
-##### Decorators for Non-Method Class Members
+##### Decorators for Class Instance Fields
 
-In lockstep with the [sibling proposal for class-member decorators](https://github.com/wycats/javascript-decorators), declarative class properties also provide a syntactic (and semantic) space for specifying decorators on class properties. This opens up an expansive set of use cases for decorators within classes beyond what could otherwise only be applied to method members. Some examples include `@readonly` (for, say, specifying `writable:false` on the property descriptor), or `@hasMany` (for systems like Ember where the framework may generate a getter that does a batched fetch), etc.
+In lockstep with the [sibling proposal for class-member decorators](https://github.com/wycats/javascript-decorators), class instance fields must also provide a syntactic (and semantic) space for specifying decorators on said fields. This opens up an expansive set of use cases for decorators within classes beyond what could otherwise only be applied to method members. Some examples include `@readonly` (for, say, specifying `writable:false` on the property descriptor), or `@hasMany` (for systems like Ember where the framework may generate a getter that does a batched fetch), etc.
 
 ##### Potential VM Warm-Up Optimizations
 
-When properties are specified declaratively, VMs have an opportunity to generate best-effort member offsets earlier (similar to existing strategies like hidden classes).
+When class instance fields are specified declaratively, VMs have an opportunity to generate best-effort optimizations earlier (at compile time) similar to existing strategies like hidden classes.
 
-## Proposal 2/2: Class "Static" Properties
+## Part 2: Class Static Properties
 
-(This is a proposal very much related to the former, but is much simpler in scope and is technically orthogonal -- so I've separated it for simplicity.)
+(This is very much related to the former section, but is much simpler in scope and is technically orthogonal -- so I've separated it for simplicity)
 
-This second proposal intends to include a declarative means of expressing "static" properties on an ES class. These property declarations may include intializers, but are not required to do so.
+This second part of the proposal intends to include a declarative means of expressing "static" properties on an ES class object. These property declarations may include intializers, but are not required to do so.
 
 The proposed syntax for this is as follows:
 
@@ -139,31 +159,22 @@ class MyClass {
 
 Static property declarations are fairly straightforward in terms of semantics compared to their instance-property counter-parts. When a class definition is evaluated, the following set of operations is executed:
 
-1. If the property name is computed, evaluate the computed property expression to a string to conclude the name of the property.
-2. Create a function whose body simply executes the initializer expression and returns the result. This function's parent scope should be set to the scope of the class body. To be super clear: This scope should sit sibling to the scope of any of the class's method bodies.
-3. If the `ClassDefinition[Symbol.classProperties]` object is not already set, create and set it.
-4. On the `ClassDefinition[Symbol.classProperties]` object, store the function generated in step 2 under the key matching the same name of the property being evauated.
-5. Call the function defined in step 2 with a `this` value equal to the `this` value of the object being constructed.
-6. Define the result of the call in step 5 as a property on the `this` object with a key corresponding to the name of the property currently being evaluated. It should be defined with the following descriptor:
-
-```javascript
-{
-  configurable: true,
-  enumerable: true,
-  writable: true,
-  get: undefined,
-  set: undefined,
-  value: <<initializer result from step 1>>,
-}
-```
-
-Note that we store the static property thunk functions on `ClassDefinition[Symbol.classProperties]` for purposes of userland reflection on how the class was declared.
+1. Let _F_ be the class object being defined.
+2. Let _fieldName_ be the result of executing [PropName](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-object-initializer-static-semantics-propname) of the _PropertyName_ of the static property declaration
+3. If an initializer expression is present
+  1. Let _initializerValue_ be the result of evaluating the initializer expression.
+4. Else,
+  1. Let _initializerValue_ be the result of \[\[Get]](_fieldName_, _F_)
+5. Let _propertyDescriptor_ be PropertyDescriptor{\[\[Value]]: _initializerValue_, \[\[Writable]]: true, \[\[Enumerable]]: true, \[\[Configurable]]: true}.
+6. Call _F_.\[\[DefineOwnProperty]](_fieldName_, _propertyDescriptor_).
 
 ### Why?
 
 Currently it's possible to express static methods on a class definition, but it is not possible to declaratively express static properties. As a result people generally have to assign static properties on a class after the class declaration -- which makes it very easy to miss the assignment as it does not appear as part of the definition.
 
 ## Spec Text
+
+(TODO: Spec text is outdated and is pending updates to changes that were made since the September2015 TC39 meeting and are already reflected in the above abstracts)
 
 ##### [14.5 Class Definitions](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-class-definitions)
 
