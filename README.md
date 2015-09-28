@@ -160,13 +160,13 @@ class MyClass {
 Static property declarations are fairly straightforward in terms of semantics compared to their instance-property counter-parts. When a class definition is evaluated, the following set of operations is executed:
 
 1. Let _F_ be the class object being defined.
-2. Let _fieldName_ be the result of executing [PropName](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-object-initializer-static-semantics-propname) of the _PropertyName_ of the static property declaration
+2. Let _propName_ be the result of executing [PropName](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-object-initializer-static-semantics-propname) of the _PropertyName_ of the static property declaration
 3. If an initializer expression is present
   1. Let _initializerValue_ be the result of evaluating the initializer expression.
 4. Else,
-  1. Let _initializerValue_ be the result of \[\[Get]](_fieldName_, _F_)
+  1. Let _initializerValue_ be the result of \[\[Get]](_propName_, _F_)
 5. Let _propertyDescriptor_ be PropertyDescriptor{\[\[Value]]: _initializerValue_, \[\[Writable]]: true, \[\[Enumerable]]: true, \[\[Configurable]]: true}.
-6. Call _F_.\[\[DefineOwnProperty]](_fieldName_, _propertyDescriptor_).
+6. Call _F_.\[\[DefineOwnProperty]](_propName_, _propertyDescriptor_).
 
 ### Why?
 
