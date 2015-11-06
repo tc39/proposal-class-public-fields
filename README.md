@@ -11,7 +11,7 @@ The proposed syntax for this is as follows:
 ```javascript
 class MyClass {
   myProp = 42;
-  
+
   constructor() {
     console.log(this.myProp); // Prints '42'
   }
@@ -80,7 +80,7 @@ The process of declaring instance fields on a class happens at the time of [clas
   1. Let _fieldInitializerExpression_ be a thunk of the expression represented by \[\[Get]](_fieldName_, _this_)
 5. Call _F_.\[\[SetClassInstanceField]](fieldName, fieldInitializerExpression) to store the field name + initializer on the constructor.
 
-Note that the purpose for storing the initializer expressions as a thunk is to allow the deferred execution of the initialization expression until class construction time; Thus, 
+Note that the purpose for storing the initializer expressions as a thunk is to allow the deferred execution of the initialization expression until class construction time; Thus,
 
 ##### Instance Field Initialization Process
 
@@ -105,7 +105,7 @@ Additionally, because instance-generated properties often need to be setup durin
 class ReactCounter extends React.Component {
   constructor(props) { // boilerplate
     super(props); // boilerplate
-    
+
     // Setup initial "state" property
     this.state = {
       count: 0
@@ -148,7 +148,7 @@ The proposed syntax for this is as follows:
 ```javascript
 class MyClass {
   static myStaticProp = 42;
-  
+
   constructor() {
     console.log(MyClass.myStaticProp); // Prints '42'
   }
@@ -179,7 +179,7 @@ Currently it's possible to express static methods on a class definition, but it 
 ##### [14.5 Class Definitions](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-class-definitions)
 
 ```
-ClassPropertyInitializer : 
+ClassPropertyInitializer :
   PropertyName ;
   PropertyName = AssignmentExpression ;
 
