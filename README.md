@@ -73,7 +73,7 @@ During the process of executing field initializers at construction time, field i
 The process of declaring instance fields on a class happens at the time of [class definition evaluation](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-runtime-semantics-classdefinitionevaluation). This process is roughly defined as follows for each field in the order the fields are declared:
 
 1. Let _F_ be the class object being defined.
-2. Let _fieldName_ be the result of evaluating the field name expression to a string (i.e. potentially a computed property).
+2. Let _fieldName_ be the result of evaluating the field name expression (i.e. potentially a computed property).
 2. If an initializer expression is present on the field declaration
     1. Let _fieldInitializerExpression_ be a thunk of the initializer expression.
 4. Else,
@@ -87,7 +87,7 @@ Note that the purpose for storing the initializer expressions as a thunk is to a
 The process for executing a field initializer happens at class instantiation time. The following describes the process for initializing each class field initializer (intended to run once for each field in the order they are declared):
 
 1. Let _instance_ be the object being instantiated.
-2. Let _fieldName_ be the string name for the current field (as stored in the slot on the constructor function).
+2. Let _fieldName_ be the name for the current field (as stored in the slot on the constructor function).
 3. Let _fieldInitializerExpression_ be the thunked initializer expression for the current field (as stored in the slot on the constructor function).
 4. Let _initializerResult_ be the result of evaluating _fieldInitializerExpression_ with `this` equal to _instance_.
 5. Let _propertyDescriptor_ be PropertyDescriptor{\[\[Value]]: _initializerResult_, \[\[Writable]]: true, \[\[Enumerable]]: true, \[\[Configurable]]: true}.
