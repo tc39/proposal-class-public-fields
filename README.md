@@ -179,15 +179,15 @@ Currently it's possible to express static methods on a class definition, but it 
 ##### [14.5 Class Definitions](http://www.ecma-international.org/ecma-262/6.0/index.html#sec-class-definitions)
 
 ```
-ClassPropertyInitializer :
+ClassFieldInitializer :
   PropertyName ;
   PropertyName = AssignmentExpression ;
 
 ClassElement :
   MethodDefinition
   static MethodDefinition
-  ClassPropertyInitializer
-  static _ClassPropertyInitializer
+  ClassFieldInitializer
+  static ClassFieldInitializer
   ;
 ```
 
