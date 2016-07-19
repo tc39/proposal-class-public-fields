@@ -1,0 +1,7 @@
+*.tmp
+*.swp
+node_modules
+ecmarkup.js
+ecmarkup.css
+index.htm
+.DS_*

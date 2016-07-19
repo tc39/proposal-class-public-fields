@@ -1,0 +1,11 @@
+{
+  "name": "es-class-public-fields",
+  "version": "0.0.0",
+  "dependencies": {
+    "ecmarkup": "^3.2.6"
+  },
+  "scripts": {
+    "generate": "ecmarkup spec/index.htm index.htm --css ecmarkup.css --js ecmarkup.js",
+    "watch": "ecmarkup --watch spec/index.htm index.htm --css ecmarkup.css --js ecmarkup.js"
+  }
+}

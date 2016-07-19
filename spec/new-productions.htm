@@ -1,0 +1,134 @@
+<h1>New Productions</h1>
+
+<emu-clause id="public-field-definition">
+  <h1>|PublicFieldDefinition|</h1>
+
+  <emu-grammar>
+    PublicFieldDefinition :
+      PropertyName[?Yield] Initializer? `;`
+  </emu-grammar>
+</emu-clause>
+
+<emu-clause id="static-semantics-class-public-fields">
+  <h1>Static Semantics: ClassPublicFields</h1>
+
+  <emu-grammar>ClassElementList: ClassElement</emu-grammar>
+  <emu-alg>
+    1. If |ClassElement| is the production 
+       <emu-grammar>ClassElement : PublicFieldDefinition</emu-grammar>, return
+       a List containing |ClassElement|.
+    2. Else, return a new empty List.
+  </emu-alg>
+
+  <emu-grammar>ClassElementList: ClassElementList ClassElement</emu-grammar>
+  <emu-alg>
+    1. Let _list_ be ClassPublicFields of |ClassElementList|.
+    1. Let _tail_ be ClassPublicFields of |ClassElement|.
+    1. For each _tailItem_ in order from _tail_, do
+      1. Append _tailItem_ to _list.
+    1. Return _list_.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="runtime-semantics-class-public-field-definition-evaluation">
+  <h1>ClassPublicFieldDefinitionEvaluation</h1>
+
+  <emu-grammar>
+    PublicFieldDefinition : PropertyName[?Yield] Initializer? `;`
+  </emu-grammar>
+  <emu-alg>
+    1. Let _fieldName_ be the result of performing PropName of |PropertyName|.
+    1. If |Initializer_opt| is present, let _initializer_ be |Initializer_opt|
+    1. Else, let _initializer_ be ~empty~.
+    1. Return Record{
+         [[name]]: _fieldName_, 
+         [[initializer]]: _initializer_,
+         [[static]]: *false*,
+       }.
+  </emu-alg>
+
+  <emu-grammar>
+    PublicFieldDefinition : static PropertyName[?Yield] Initializer? `;`
+  </emu-grammar>
+  <emu-alg>
+    1. Let _fieldName_ be the result of performing PropName of |PropertyName|.
+    1. If |Initializer_opt| is present, let _initializer_ be |Initializer_opt|
+    1. Else, let _initializer_ be ~empty~.
+    1. Return Record{
+         [[name]]: _fieldName_, 
+         [[initializer]]: _initializer_,
+         [[static]]: *true*,
+       }.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="initialize-public-static-fields">
+  <h1>InitializePublicStaticFields(_F_)</h1>
+
+  <emu-alg>
+    1. Assert: Type(_F_) is Object.
+    1. Assert: _F_ is an ECMAScript function object.
+    1. Let _publicFieldRecords_ be the value of _F_'s [[PublicFields]] internal slot.
+    1. For each item _fieldRecord_ in order from _publicFieldRecords_,
+      1. If _fieldRecord_.[[static]] is *true*, then
+        1. Let _fieldName_ be _fieldRecord_.[[name]].
+        1. Let _initializer_ be _fieldRecord_.[[initializer]].
+        1. If _initializeer_ is not ~empty~, then
+          1. Let _result_ be the result of evaluating _initializer_.
+          1. Let _initValue_ be the result of GetValue(_result_).
+          1. If _initValue_ is an abrupt completion, return 
+             Completion(_initValue_).
+          1. Let _desc_ be PropertyDescriptor {
+               [[configurable]]: *false*,
+               [[enumerable]]: *true*,
+               [[writable]]: *true*,
+               [[value]]: _initValue_
+             }
+          1. Perform ?DefinePropertyOrThrow (_F_, _fieldName_, _desc_)
+    1. Return.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="initialize-public-instance-fields">
+  <h1>InitializePublicInstanceFields ( _O_, _constructor_ )</h1>
+
+  <p>
+    TODO: Factor out the lexical environment wrangling and do that at the 
+          callsites of this procedure.
+  </p>
+  <emu-note>
+    We likely want to execute public and private fields their coalesced order of 
+    definition, so when the two proposals merge we'll probably want to merge
+    their initialization procedures as well.
+  </emu-note>
+
+  <emu-alg>
+    1. Assert: Type ( _O_ ) is Object.
+    1. Assert: Assert _constructor_ is an ECMAScript function object.
+    1. Let _lex_ be the Lexical Environment of the running execution context.
+    1. Let _initializerEnv_ be NewFunctionEnvironment ( _constructor_, *undefined* ).
+    1. Let _initializerEnvRec_ be the value of _initializerEnv_'s EnvironmentRecord.
+    1. Perform _initializerER.BindThisValue ( _O_ ).
+    1. Set the running execution context's LexicalEnvironment to _initializerEnv_.
+    1. Let _publicFieldRecords_ be the value of _constructor_'s [[PublicFields]] internal slot.
+    1. For each item _fieldRecord_ in order from _publicFieldRecords_,
+      1. If _fieldRecord_.[[static]] is *false*, then
+        1. Let _fieldName_ be _fieldRecord_.[[name]]
+        1. Let _initializer_ be _fieldRecord_.[[initializer]].
+        1. If _initializer_ is not ~empty~, then
+          1. Let _result_ be the result of evaluating _initializer_.
+          1. Let _initValue_ be GetValue(_result_).
+          1. If _initValue_ is an abrupt completion, then
+            1. Set the running execution context's LexicalEnvironment to _lex_.
+            1. Return Completion(_initValue_).
+          1. Let _desc_ be PropertyDescriptor {
+               [[configurable]]: *false*,
+               [[enumerable]]: *true*,
+               [[writable]]: *true*,
+               [[value]]: _initValue_
+             }
+          1. Perform ?DefinePropertyOrThrow (_O_, _fieldName_, _desc_)
+    1. Set the running execution context's LexicalEnvironment to _lex_.
+    1. Return.
+  </emu-alg>
+</emu-clause>

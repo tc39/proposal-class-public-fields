@@ -1,0 +1,150 @@
+<h1>Modified Productions</h1>
+
+<emu-clause id="class-element">
+  <h1>|ClassElement|</h1>
+
+  <emu-production name="ClassElement">
+    <emu-rhs><emu-nt params="?Yield">MethodDefinition</emu-nt></emu-rhs>
+    <emu-rhs>static <emu-nt params="?Yield">MethodDefinition</emu-nt></emu-rhs>
+    <ins class="block">
+      <emu-rhs><emu-nt params="?Yield">PublicFieldDefinition</emu-nt></emu-rhs>
+      <emu-rhs>static <emu-nt params="?Yield">PublicFieldDefinition</emu-nt></emu-rhs>
+    </ins>
+    <emu-rhs>;</emu-rhs>
+  </emu-production>
+</emu-clause>
+
+<emu-clause id="runtime-semantics-class-definition-evaluation">
+  <h1>Runtime Semantics: ClassDefinitionEvaluation</h1>
+
+  <p>With parameter _className_.</p>
+  <emu-grammar>ClassTail : ClassHeritage? `{` ClassBody? `}`</emu-grammar>
+  <emu-alg>
+    1. Let _lex_ be the LexicalEnvironment of the running execution context.
+    1. Let _classScope_ be NewDeclarativeEnvironment(_lex_).
+    1. Let _classScopeEnvRec_ be _classScope_'s EnvironmentRecord.
+    1. If _className_ is not *undefined*, then
+      1. Perform _classScopeEnvRec_.CreateImmutableBinding(_className_, *true*).
+    1. If |ClassHeritage_opt| is not present, then
+      1. Let _protoParent_ be the intrinsic object %ObjectPrototype%.
+      1. Let _constructorParent_ be the intrinsic object %FunctionPrototype%.
+    1. Else,
+      1. Set the running execution context's LexicalEnvironment to _classScope_.
+      1. Let _superclass_ be the result of evaluating |ClassHeritage|.
+      1. Set the running execution context's LexicalEnvironment to _lex_.
+      1. ReturnIfAbrupt(_superclass_).
+      1. If _superclass_ is *null*, then
+        1. Let _protoParent_ be *null*.
+        1. Let _constructorParent_ be the intrinsic object %FunctionPrototype%.
+      1. Else if IsConstructor(_superclass_) is *false*, throw a *TypeError* exception.
+      1. Else,
+        1. Let _protoParent_ be ? Get(_superclass_, `"prototype"`).
+        1. If Type(_protoParent_) is neither Object nor Null, throw a *TypeError* exception.
+        1. Let _constructorParent_ be _superclass_.
+    1. Let _proto_ be ObjectCreate(_protoParent_).
+    1. If |ClassBody_opt| is not present, let _constructor_ be ~empty~.
+    1. Else, let _constructor_ be ConstructorMethod of |ClassBody|.
+    1. If _constructor_ is ~empty~, then
+      1. If |ClassHeritage_opt| is present and _protoParent_ is not *null*, then
+        1. Let _constructor_ be the result of parsing the source text
+          <pre><code class="javascript">constructor(... args){ super (...args);}</code></pre>
+          using the syntactic grammar with the goal symbol |MethodDefinition[~Yield]|.
+      1. Else,
+        1. Let _constructor_ be the result of parsing the source text
+          <pre><code class="javascript">constructor( ){ }</code></pre>
+          using the syntactic grammar with the goal symbol |MethodDefinition[~Yield]|.
+    1. Set the running execution context's LexicalEnvironment to _classScope_.
+    1. Let _constructorInfo_ be the result of performing DefineMethod for _constructor_ with arguments _proto_ and _constructorParent_ as the optional _functionPrototype_ argument.
+    1. Assert: _constructorInfo_ is not an abrupt completion.
+    1. Let _F_ be _constructorInfo_.[[Closure]].
+    1. If |ClassHeritage_opt| is present and _protoParent_ is not *null*, then set _F_.[[ConstructorKind]] to `"derived"`.
+    1. Perform MakeConstructor(_F_, *false*, _proto_).
+    1. Perform MakeClassConstructor(_F_).
+    1. Perform CreateMethodProperty(_proto_, `"constructor"`, _F_).
+    1. <ins>If |ClassBody_opt| is not present, let _publicFields_ be a new empty List.</ins>
+    1. <ins>Else, let _publicFields_ be the result of performing
+       ClassPublicFields of |ClassBody|.</ins>
+    1. If |ClassBody_opt| is not present, let _methods_ be a new empty List.
+    1. Else, let _methods_ be NonConstructorMethodDefinitions of |ClassBody|.
+    1. For each |ClassElement| _m_ in order from _methods_
+      1. If IsStatic of _m_ is *false*, then
+        1. Let _status_ be the result of performing PropertyDefinitionEvaluation for _m_ with arguments _proto_ and *false*.
+      1. Else,
+        1. Let _status_ be the result of performing PropertyDefinitionEvaluation for _m_ with arguments _F_ and *false*.
+      1. If _status_ is an abrupt completion, then
+        1. Set the running execution context's LexicalEnvironment to _lex_.
+        1. Return Completion(_status_).
+    1. Set the running execution context's LexicalEnvironment to _lex_.
+    1. If _className_ is not *undefined*, then
+      1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
+    1. <ins>Let _publicFieldRecords_ be a new empty List.</ins>
+    1. <ins>For each item _publicField_ from _publicFields_,</ins>
+      1. <ins>Let _fieldRecord_ be the result of performing ClassPublicFieldDefinitionEvaluation for _publicField_.</ins>
+      1. <ins>Append _fieldRecord_ to _publicFieldRecords_.</ins>
+    1. <ins>Set the value of _F_'s [[PublicFields]] internal slot to _publicFieldRecords_.</ins>
+    1. <ins>Set the running execution context's LexicalEnvironment to _classScope_.</ins>
+    1. <ins>Let _result_ be InitializePublicStaticFields(_F_).</ins>
+    1. <ins>If _result_ is an abrupt completion, then</ins>
+      1. <ins>Set the running execution context's LexicalEnvironment to _lex_.</ins>
+      1. <ins>Return Completion(_result_)</ins>
+    1. <ins>Set the running execution context's LexicalEnvironment to _lex_.</ins>
+    1. Return _F_.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="[[construct]]">
+  <h1>[[Construct]] ( _argumentsList_, _newTarget_)</h1>
+  <p>
+    The [[Construct]] internal method for an ECMAScript Function object _F_ is
+    called with parameters _argumentsList_ and _newTarget_. _argumentsList_ is
+    a possibly empty List of ECMAScript language values. The following steps are
+    taken:
+  </p>
+  <emu-alg>
+    1. Assert: _F_ is an ECMAScript function object.
+    1. Assert: Type(_newTarget_) is Object.
+    1. Let _callerContext_ be the running execution context.
+    1. Let _kind_ be _F_.[[ConstructorKind]].
+    1. If _kind_ is `"base"`, then
+      1. Let _thisArgument_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%ObjectPrototype%"`).
+    1. Let _calleeContext_ be PrepareForOrdinaryCall(_F_, _newTarget_).
+    1. Assert: _calleeContext_ is now the running execution context.
+    1. If _kind_ is `"base"`, then
+      1. Perform OrdinaryCallBindThis(_F_, _calleeContext_, _thisArgument_).
+      1. <ins>Let _result_ be InitializePublicInstanceFields(_thisArgument_, _F_).</ins>
+      1. <ins>If _result_ is an abrupt completion, then</ins>
+        1. <ins>Remove _calleeContext_ from execution context stack and restore
+           _callerContext_ as the running execution context.</ins>
+        1. <ins>Return Completion(_result_).</ins>
+    1. Let _constructorEnv_ be the LexicalEnvironment of _calleeContext_.
+    1. Let _envRec_ be _constructorEnv_'s EnvironmentRecord.
+    1. Let _result_ be OrdinaryCallEvaluateBody(_F_, _argumentsList_).
+    1. Remove _calleeContext_ from the execution context stack and restore _callerContext_ as the running execution context.
+    1. If _result_.[[Type]] is ~return~, then
+      1. If Type(_result_.[[Value]]) is Object, return NormalCompletion(_result_.[[Value]]).
+      1. If _kind_ is `"base"`, return NormalCompletion(_thisArgument_).
+      1. If _result_.[[Value]] is not *undefined*, throw a *TypeError* exception.
+    1. Else, ReturnIfAbrupt(_result_).
+    1. Return ? _envRec_.GetThisBinding().
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="the-super-keyword">
+  <h1>The `super` Keyword</h1>
+
+  <emu-clause id="sec-super-keyword-runtime-semantics-evaluation">
+    <h1>Runtime Semantics: Evaluation</h1>
+    <emu-grammar>SuperCall : `super` Arguments</emu-grammar>
+    <emu-alg>
+      1. Let _newTarget_ be GetNewTarget().
+      1. If _newTarget_ is *undefined*, throw a *ReferenceError* exception.
+      1. Let _func_ be ? GetSuperConstructor().
+      1. Let _argList_ be ArgumentListEvaluation of |Arguments|.
+      1. ReturnIfAbrupt(_argList_).
+      1. Let _result_ be ? Construct(_func_, _argList_, _newTarget_).
+      1. Let _thisER_ be GetThisEnvironment( ).
+      1. <ins>Perform ? InitializePublicInstanceFields(_thisValue_, _F_).</ins>
+      1. Return ? _thisER_.BindThisValue(_result_).
+    </emu-alg>
+  </emu-clause>
+</emu-clause>
