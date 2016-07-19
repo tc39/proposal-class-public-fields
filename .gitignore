@@ -1,3 +1,4 @@
 *.swp
 *.tmp
 node_modules
+.DS_*
