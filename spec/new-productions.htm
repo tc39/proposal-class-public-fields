@@ -17,15 +17,21 @@
     1. If |ClassElement| is the production 
        <emu-grammar>ClassElement : PublicFieldDefinition</emu-grammar>, return
        a List containing |ClassElement|.
-    2. Else, return a new empty List.
+    1. If |ClassElement| is the production 
+       <emu-grammar>ClassElement : static PublicFieldDefinition</emu-grammar>, 
+       return a List containing |ClassElement|.
+    1. Return a new empty List.
   </emu-alg>
 
   <emu-grammar>ClassElementList: ClassElementList ClassElement</emu-grammar>
   <emu-alg>
     1. Let _list_ be ClassPublicFields of |ClassElementList|.
-    1. Let _tail_ be ClassPublicFields of |ClassElement|.
-    1. For each _tailItem_ in order from _tail_, do
-      1. Append _tailItem_ to _list.
+    1. If |ClassElement| is the production
+       <emu-grammar>ClassElement : PublicFieldDefinition</emu-grammar>, append
+       |ClassElement| to the end of _list_.
+    1. If |ClassElement| is the production
+       <emu-grammar>ClassElement : static PublicFieldDefinition</emu-grammar>, 
+       append |ClassElement| to the end of _list_.
     1. Return _list_.
   </emu-alg>
 </emu-clause>
@@ -33,22 +39,10 @@
 <emu-clause id="runtime-semantics-class-public-field-definition-evaluation">
   <h1>ClassPublicFieldDefinitionEvaluation</h1>
 
-  <emu-grammar>
-    PublicFieldDefinition : PropertyName[?Yield] Initializer? `;`
-  </emu-grammar>
-  <emu-alg>
-    1. Let _fieldName_ be the result of performing PropName of |PropertyName|.
-    1. If |Initializer_opt| is present, let _initializer_ be |Initializer_opt|
-    1. Else, let _initializer_ be ~empty~.
-    1. Return Record{
-         [[name]]: _fieldName_, 
-         [[initializer]]: _initializer_,
-         [[static]]: *false*,
-       }.
-  </emu-alg>
+  <p>With parameter _isStatic_.</p>
 
   <emu-grammar>
-    PublicFieldDefinition : static PropertyName[?Yield] Initializer? `;`
+    PublicFieldDefinition : PropertyName[?Yield] Initializer?
   </emu-grammar>
   <emu-alg>
     1. Let _fieldName_ be the result of performing PropName of |PropertyName|.
@@ -57,7 +51,7 @@
     1. Return Record{
          [[name]]: _fieldName_, 
          [[initializer]]: _initializer_,
-         [[static]]: *true*,
+         [[static]]: _isStatic_,
        }.
   </emu-alg>
 </emu-clause>
@@ -83,8 +77,8 @@
                [[enumerable]]: *true*,
                [[writable]]: *true*,
                [[value]]: _initValue_
-             }
-          1. Perform ?DefinePropertyOrThrow (_F_, _fieldName_, _desc_)
+             }.
+          1. Perform ?DefinePropertyOrThrow (_F_, _fieldName_, _desc_).
     1. Return.
   </emu-alg>
 </emu-clause>
@@ -108,7 +102,7 @@
     1. Let _lex_ be the Lexical Environment of the running execution context.
     1. Let _initializerEnv_ be NewFunctionEnvironment ( _constructor_, *undefined* ).
     1. Let _initializerEnvRec_ be the value of _initializerEnv_'s EnvironmentRecord.
-    1. Perform _initializerER.BindThisValue ( _O_ ).
+    1. Perform _initializerER_.BindThisValue ( _O_ ).
     1. Set the running execution context's LexicalEnvironment to _initializerEnv_.
     1. Let _publicFieldRecords_ be the value of _constructor_'s [[PublicFields]] internal slot.
     1. For each item _fieldRecord_ in order from _publicFieldRecords_,

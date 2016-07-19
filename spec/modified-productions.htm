@@ -1,95 +1,118 @@
 <h1>Modified Productions</h1>
 
-<emu-clause id="class-element">
-  <h1>|ClassElement|</h1>
+<emu-clause id="class-definitions">
+  <h1>Class Definitions</h1>
 
-  <emu-production name="ClassElement">
-    <emu-rhs><emu-nt params="?Yield">MethodDefinition</emu-nt></emu-rhs>
-    <emu-rhs>static <emu-nt params="?Yield">MethodDefinition</emu-nt></emu-rhs>
+  <emu-clause id="static-semantics-is-static">
+    <h1>Static Semantics: IsStatic</h1>
+
     <ins class="block">
-      <emu-rhs><emu-nt params="?Yield">PublicFieldDefinition</emu-nt></emu-rhs>
-      <emu-rhs>static <emu-nt params="?Yield">PublicFieldDefinition</emu-nt></emu-rhs>
+      <emu-grammar>ClassElement : PublicFieldDefinition</emu-grammar>
+      <emu-alg>
+        1. Return *false*.
+      </emu-alg>
+
+      <emu-grammar>ClassElement : static PublicFieldDefinition</emu-grammar>
+      <emu-alg>
+        1. Return *true*.
+      </emu-alg>
     </ins>
-    <emu-rhs>;</emu-rhs>
-  </emu-production>
-</emu-clause>
+  </emu-clause>
 
-<emu-clause id="runtime-semantics-class-definition-evaluation">
-  <h1>Runtime Semantics: ClassDefinitionEvaluation</h1>
+  <emu-clause id="class-element">
+    <h1>|ClassElement|</h1>
 
-  <p>With parameter _className_.</p>
-  <emu-grammar>ClassTail : ClassHeritage? `{` ClassBody? `}`</emu-grammar>
-  <emu-alg>
-    1. Let _lex_ be the LexicalEnvironment of the running execution context.
-    1. Let _classScope_ be NewDeclarativeEnvironment(_lex_).
-    1. Let _classScopeEnvRec_ be _classScope_'s EnvironmentRecord.
-    1. If _className_ is not *undefined*, then
-      1. Perform _classScopeEnvRec_.CreateImmutableBinding(_className_, *true*).
-    1. If |ClassHeritage_opt| is not present, then
-      1. Let _protoParent_ be the intrinsic object %ObjectPrototype%.
-      1. Let _constructorParent_ be the intrinsic object %FunctionPrototype%.
-    1. Else,
-      1. Set the running execution context's LexicalEnvironment to _classScope_.
-      1. Let _superclass_ be the result of evaluating |ClassHeritage|.
-      1. Set the running execution context's LexicalEnvironment to _lex_.
-      1. ReturnIfAbrupt(_superclass_).
-      1. If _superclass_ is *null*, then
-        1. Let _protoParent_ be *null*.
+    <emu-production name="ClassElement">
+      <emu-rhs><emu-nt params="?Yield">MethodDefinition</emu-nt></emu-rhs>
+      <emu-rhs>static <emu-nt params="?Yield">MethodDefinition</emu-nt></emu-rhs>
+      <ins class="block">
+        <emu-rhs><emu-nt params="?Yield">PublicFieldDefinition</emu-nt></emu-rhs>
+        <emu-rhs>static <emu-nt params="?Yield">PublicFieldDefinition</emu-nt></emu-rhs>
+      </ins>
+      <emu-rhs>;</emu-rhs>
+    </emu-production>
+  </emu-clause>
+
+  <emu-clause id="runtime-semantics-class-definition-evaluation">
+    <h1>Runtime Semantics: ClassDefinitionEvaluation</h1>
+
+    <p>With parameter _className_.</p>
+    <emu-grammar>ClassTail : ClassHeritage? `{` ClassBody? `}`</emu-grammar>
+    <emu-alg>
+      1. Let _lex_ be the LexicalEnvironment of the running execution context.
+      1. Let _classScope_ be NewDeclarativeEnvironment(_lex_).
+      1. Let _classScopeEnvRec_ be _classScope_'s EnvironmentRecord.
+      1. If _className_ is not *undefined*, then
+        1. Perform _classScopeEnvRec_.CreateImmutableBinding(_className_, *true*).
+      1. If |ClassHeritage_opt| is not present, then
+        1. Let _protoParent_ be the intrinsic object %ObjectPrototype%.
         1. Let _constructorParent_ be the intrinsic object %FunctionPrototype%.
-      1. Else if IsConstructor(_superclass_) is *false*, throw a *TypeError* exception.
       1. Else,
-        1. Let _protoParent_ be ? Get(_superclass_, `"prototype"`).
-        1. If Type(_protoParent_) is neither Object nor Null, throw a *TypeError* exception.
-        1. Let _constructorParent_ be _superclass_.
-    1. Let _proto_ be ObjectCreate(_protoParent_).
-    1. If |ClassBody_opt| is not present, let _constructor_ be ~empty~.
-    1. Else, let _constructor_ be ConstructorMethod of |ClassBody|.
-    1. If _constructor_ is ~empty~, then
-      1. If |ClassHeritage_opt| is present and _protoParent_ is not *null*, then
-        1. Let _constructor_ be the result of parsing the source text
-          <pre><code class="javascript">constructor(... args){ super (...args);}</code></pre>
-          using the syntactic grammar with the goal symbol |MethodDefinition[~Yield]|.
-      1. Else,
-        1. Let _constructor_ be the result of parsing the source text
-          <pre><code class="javascript">constructor( ){ }</code></pre>
-          using the syntactic grammar with the goal symbol |MethodDefinition[~Yield]|.
-    1. Set the running execution context's LexicalEnvironment to _classScope_.
-    1. Let _constructorInfo_ be the result of performing DefineMethod for _constructor_ with arguments _proto_ and _constructorParent_ as the optional _functionPrototype_ argument.
-    1. Assert: _constructorInfo_ is not an abrupt completion.
-    1. Let _F_ be _constructorInfo_.[[Closure]].
-    1. If |ClassHeritage_opt| is present and _protoParent_ is not *null*, then set _F_.[[ConstructorKind]] to `"derived"`.
-    1. Perform MakeConstructor(_F_, *false*, _proto_).
-    1. Perform MakeClassConstructor(_F_).
-    1. Perform CreateMethodProperty(_proto_, `"constructor"`, _F_).
-    1. <ins>If |ClassBody_opt| is not present, let _publicFields_ be a new empty List.</ins>
-    1. <ins>Else, let _publicFields_ be the result of performing
-       ClassPublicFields of |ClassBody|.</ins>
-    1. If |ClassBody_opt| is not present, let _methods_ be a new empty List.
-    1. Else, let _methods_ be NonConstructorMethodDefinitions of |ClassBody|.
-    1. For each |ClassElement| _m_ in order from _methods_
-      1. If IsStatic of _m_ is *false*, then
-        1. Let _status_ be the result of performing PropertyDefinitionEvaluation for _m_ with arguments _proto_ and *false*.
-      1. Else,
-        1. Let _status_ be the result of performing PropertyDefinitionEvaluation for _m_ with arguments _F_ and *false*.
-      1. If _status_ is an abrupt completion, then
+        1. Set the running execution context's LexicalEnvironment to _classScope_.
+        1. Let _superclass_ be the result of evaluating |ClassHeritage|.
         1. Set the running execution context's LexicalEnvironment to _lex_.
-        1. Return Completion(_status_).
-    1. Set the running execution context's LexicalEnvironment to _lex_.
-    1. If _className_ is not *undefined*, then
-      1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
-    1. <ins>Let _publicFieldRecords_ be a new empty List.</ins>
-    1. <ins>For each item _publicField_ from _publicFields_,</ins>
-      1. <ins>Let _fieldRecord_ be the result of performing ClassPublicFieldDefinitionEvaluation for _publicField_.</ins>
-      1. <ins>Append _fieldRecord_ to _publicFieldRecords_.</ins>
-    1. <ins>Set the value of _F_'s [[PublicFields]] internal slot to _publicFieldRecords_.</ins>
-    1. <ins>Set the running execution context's LexicalEnvironment to _classScope_.</ins>
-    1. <ins>Let _result_ be InitializePublicStaticFields(_F_).</ins>
-    1. <ins>If _result_ is an abrupt completion, then</ins>
+        1. ReturnIfAbrupt(_superclass_).
+        1. If _superclass_ is *null*, then
+          1. Let _protoParent_ be *null*.
+          1. Let _constructorParent_ be the intrinsic object %FunctionPrototype%.
+        1. Else if IsConstructor(_superclass_) is *false*, throw a *TypeError* exception.
+        1. Else,
+          1. Let _protoParent_ be ? Get(_superclass_, `"prototype"`).
+          1. If Type(_protoParent_) is neither Object nor Null, throw a *TypeError* exception.
+          1. Let _constructorParent_ be _superclass_.
+      1. Let _proto_ be ObjectCreate(_protoParent_).
+      1. If |ClassBody_opt| is not present, let _constructor_ be ~empty~.
+      1. Else, let _constructor_ be ConstructorMethod of |ClassBody|.
+      1. If _constructor_ is ~empty~, then
+        1. If |ClassHeritage_opt| is present and _protoParent_ is not *null*, then
+          1. Let _constructor_ be the result of parsing the source text
+            <pre><code class="javascript">constructor(... args){ super (...args);}</code></pre>
+            using the syntactic grammar with the goal symbol |MethodDefinition[~Yield]|.
+        1. Else,
+          1. Let _constructor_ be the result of parsing the source text
+            <pre><code class="javascript">constructor( ){ }</code></pre>
+            using the syntactic grammar with the goal symbol |MethodDefinition[~Yield]|.
+      1. Set the running execution context's LexicalEnvironment to _classScope_.
+      1. Let _constructorInfo_ be the result of performing DefineMethod for _constructor_ with arguments _proto_ and _constructorParent_ as the optional _functionPrototype_ argument.
+      1. Assert: _constructorInfo_ is not an abrupt completion.
+      1. Let _F_ be _constructorInfo_.[[Closure]].
+      1. If |ClassHeritage_opt| is present and _protoParent_ is not *null*, then set _F_.[[ConstructorKind]] to `"derived"`.
+      1. Perform MakeConstructor(_F_, *false*, _proto_).
+      1. Perform MakeClassConstructor(_F_).
+      1. Perform CreateMethodProperty(_proto_, `"constructor"`, _F_).
+      1. If |ClassBody_opt| is not present, let _methods_ be a new empty List.
+      1. Else, let _methods_ be NonConstructorMethodDefinitions of |ClassBody|.
+      1. For each |ClassElement| _m_ in order from _methods_
+        1. If IsStatic of _m_ is *false*, then
+          1. Let _status_ be the result of performing PropertyDefinitionEvaluation for _m_ with arguments _proto_ and *false*.
+        1. Else,
+          1. Let _status_ be the result of performing PropertyDefinitionEvaluation for _m_ with arguments _F_ and *false*.
+        1. If _status_ is an abrupt completion, then
+          1. Set the running execution context's LexicalEnvironment to _lex_.
+          1. Return Completion(_status_).
+      1. Set the running execution context's LexicalEnvironment to _lex_.
+      1. If _className_ is not *undefined*, then
+        1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
+      1. <ins>If |ClassBody_opt| is not present, let _publicFields_ be a new empty List.</ins>
+      1. <ins>Else, let _publicFields_ be the result of performing
+         ClassPublicFields of |ClassBody|.</ins>
+      1. <ins>Let _publicFieldRecords_ be a new empty List.</ins>
+      1. <ins>For each item _publicField_ in order from _publicFields_,</ins>
+        1. <ins>Let _isStatic_ be the result of performing IsStatic of _publicField_.
+        1. <ins>Let _fieldRecord_ be the result of performing 
+           ClassPublicFieldDefinitionEvaluation for _publicField_ with argument 
+           _isStatic_.</ins>
+        1. <ins>Append _fieldRecord_ to _publicFieldRecords_.</ins>
+      1. <ins>Set the value of _F_'s [[PublicFields]] internal slot to _publicFieldRecords_.</ins>
+      1. <ins>Set the running execution context's LexicalEnvironment to _classScope_.</ins>
+      1. <ins>Let _result_ be InitializePublicStaticFields(_F_).</ins>
+      1. <ins>If _result_ is an abrupt completion, then</ins>
+        1. <ins>Set the running execution context's LexicalEnvironment to _lex_.</ins>
+        1. <ins>Return Completion(_result_)</ins>
       1. <ins>Set the running execution context's LexicalEnvironment to _lex_.</ins>
-      1. <ins>Return Completion(_result_)</ins>
-    1. <ins>Set the running execution context's LexicalEnvironment to _lex_.</ins>
-    1. Return _F_.
-  </emu-alg>
+      1. Return _F_.
+    </emu-alg>
+  </emu-clause>
 </emu-clause>
 
 <emu-clause id="[[construct]]">
