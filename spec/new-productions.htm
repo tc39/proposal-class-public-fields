@@ -72,13 +72,14 @@
           1. Let _initValue_ be the result of GetValue(_result_).
           1. If _initValue_ is an abrupt completion, return 
              Completion(_initValue_).
-          1. Let _desc_ be PropertyDescriptor {
-               [[configurable]]: *false*,
-               [[enumerable]]: *true*,
-               [[writable]]: *true*,
-               [[value]]: _initValue_
-             }.
-          1. Perform ?DefinePropertyOrThrow (_F_, _fieldName_, _desc_).
+        1. Else, let _initValue_ be *undefined*.
+        1. Let _desc_ be PropertyDescriptor {
+             [[configurable]]: *false*,
+             [[enumerable]]: *true*,
+             [[writable]]: *true*,
+             [[value]]: _initValue_
+           }.
+        1. Perform ?DefinePropertyOrThrow (_F_, _fieldName_, _desc_).
     1. Return.
   </emu-alg>
 </emu-clause>
