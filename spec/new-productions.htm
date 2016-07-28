@@ -9,18 +9,6 @@
   </emu-grammar>
 </emu-clause>
 
-<emu-clause id="public-field-definition-early-errors">
-  <h1>Static Semantics: Early Errors</h1>
-  <emu-grammar>
-    PublicFieldDefinition :
-      PropertyName[?Yield] Initializer?
-  </emu-grammar>
-  <emu-alg>
-    1. It is a SyntaxError if |Initializer| contains |MetaProperty|.
-    1. It is a SyntaxError if |Initializer| contains an |Identifier| with the StringValue `"arguments"`.
-  </emu-alg>
-</emu-clause>
-
 <emu-clause id="static-semantics-class-public-fields">
   <h1>Static Semantics: ClassPublicFields</h1>
 
@@ -51,20 +39,37 @@
 <emu-clause id="runtime-semantics-class-public-field-definition-evaluation">
   <h1>ClassPublicFieldDefinitionEvaluation</h1>
 
-  <p>With parameter _isStatic_.</p>
+  <p>With parameters _isStatic_ and _homeObject_.</p>
 
   <emu-grammar>
     PublicFieldDefinition : PropertyName[?Yield] Initializer?
   </emu-grammar>
   <emu-alg>
     1. Let _fieldName_ be the result of performing PropName of |PropertyName|.
-    1. If |Initializer_opt| is present, let _initializer_ be |Initializer_opt|
+    1. If |Initializer_opt| is present,
+      1. Let _lex_ be the Lexical Environment of the running execution context.
+      1. Let _initializer_ be FunctionCreate(~Method~, ~empty~, |Initializer_opt|, _lex_, *true*).
+      1. Perform MakeMethod(_initializer_, _homeObject_).
     1. Else, let _initializer_ be ~empty~.
     1. Return Record{
          [[name]]: _fieldName_, 
          [[initializer]]: _initializer_,
          [[static]]: _isStatic_,
        }.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="runtime-semantics-class-public-field-definition-evaluation">
+  <h1>Runtime Semantics: EvaluateBody</h1>
+
+  <p>With parameter _functionObject_.</p>
+
+  <emu-grammar>
+    Initializer[In, Yield] :
+      `=` AssignmentExpression[?In, ?Yield]
+  </emu-grammar>
+  <emu-alg>
+    1. Return the result of evaluating |AssignmentExpression|.
   </emu-alg>
 </emu-clause>
 
@@ -80,10 +85,7 @@
         1. Let _fieldName_ be _fieldRecord_.[[name]].
         1. Let _initializer_ be _fieldRecord_.[[initializer]].
         1. If _initializer_ is not ~empty~, then
-          1. Let _result_ be the result of evaluating _initializer_.
-          1. Let _initValue_ be the result of GetValue(_result_).
-          1. If _initValue_ is an abrupt completion, return 
-             Completion(_initValue_).
+          1. Let _initValue_ be ? Call(_initializer_, *undefined*).
         1. Else, let _initValue_ be *undefined*.
         1. Let _desc_ be PropertyDescriptor {
              [[configurable]]: *false*,
@@ -112,31 +114,22 @@
   <emu-alg>
     1. Assert: Type ( _O_ ) is Object.
     1. Assert: Assert _constructor_ is an ECMAScript function object.
-    1. Let _lex_ be the Lexical Environment of the running execution context.
-    1. Let _initializerEnv_ be NewFunctionEnvironment ( _constructor_, *undefined* ).
-    1. Let _initializerEnvRec_ be the value of _initializerEnv_'s EnvironmentRecord.
-    1. Perform ! _initializerEnvRec_.CreateImmutableBinding(`"arguments"`, ~false~).
-    1. Perform ! _initializerEnvRec_.InitializeBinding(`"arguments"`, ~undefined~).
-    1. Perform _initializerER_.BindThisValue ( _O_ ).
-    1. Set the running execution context's LexicalEnvironment to _initializerEnv_.
     1. Let _publicFieldRecords_ be the value of _constructor_'s [[PublicFields]] internal slot.
     1. For each item _fieldRecord_ in order from _publicFieldRecords_,
       1. If _fieldRecord_.[[static]] is *false*, then
         1. Let _fieldName_ be _fieldRecord_.[[name]]
         1. Let _initializer_ be _fieldRecord_.[[initializer]].
         1. If _initializer_ is not ~empty~, then
-          1. Let _result_ be the result of evaluating _initializer_.
-          1. Let _initValue_ be GetValue(_result_).
-          1. If _initValue_ is an abrupt completion, then
-            1. Set the running execution context's LexicalEnvironment to _lex_.
-            1. Return Completion(_initValue_).
-          1. Let _desc_ be PropertyDescriptor {
-               [[configurable]]: *false*,
-               [[enumerable]]: *true*,
-               [[writable]]: *true*,
-               [[value]]: _initValue_
-             }
-          1. Perform ?DefinePropertyOrThrow (_O_, _fieldName_, _desc_)
+          1. Let _initValue_ be ? Call(_initializer_, _O_).
+        1. Else,
+          1. Let _initValue_ be ~undefined~.
+        1. Let _desc_ be PropertyDescriptor {
+             [[configurable]]: *false*,
+             [[enumerable]]: *true*,
+             [[writable]]: *true*,
+             [[value]]: _initValue_
+           }
+        1. Perform ? DefinePropertyOrThrow (_O_, _fieldName_, _desc_)
     1. Set the running execution context's LexicalEnvironment to _lex_.
     1. Return.
   </emu-alg>

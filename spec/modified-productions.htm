@@ -99,9 +99,10 @@
       1. <ins>Let _publicFieldRecords_ be a new empty List.</ins>
       1. <ins>For each item _publicField_ in order from _publicFields_,</ins>
         1. <ins>Let _isStatic_ be the result of performing IsStatic of _publicField_.
-        1. <ins>Let _fieldRecord_ be the result of performing 
-           ClassPublicFieldDefinitionEvaluation for _publicField_ with argument 
-           _isStatic_.</ins>
+        1. <ins> If _isStatic_, let _homeObject_ be _F_, otherwise let _homeObject_ be _proto_.
+        1. <ins>Let _fieldRecord_ be the result of performing
+           ClassPublicFieldDefinitionEvaluation for _publicField_ with arguments
+           _isStatic_ and _homeObject_.</ins>
         1. <ins>Append _fieldRecord_ to _publicFieldRecords_.</ins>
       1. <ins>Set the value of _F_'s [[PublicFields]] internal slot to _publicFieldRecords_.</ins>
       1. <ins>Set the running execution context's LexicalEnvironment to _classScope_.</ins>
