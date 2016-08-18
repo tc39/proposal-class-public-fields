@@ -4,4 +4,4 @@ This presents two related proposals: "class instance fields" and "class static f
 
 This proposal is currently at Stage 2. 
 
-Latest spec text: https://jeffmo.github.io/es-class-public-fields/
+Latest spec text: https://tc39.github.io/proposal-class-public-fields/
