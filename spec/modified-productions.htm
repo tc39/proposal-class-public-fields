@@ -172,3 +172,16 @@
     </emu-alg>
   </emu-clause>
 </emu-clause>
+
+<emu-clause id="sec-performeval">
+  <h1>Runtime Semantics: PerformEval ( _x_, _evalRealm_, _strictCaller_, _direct_ )</h1>
+  <emu-clause id="sec-performeval-rules-in-initializer">
+    <h1>Additional Early Error Rules for Eval Inside |Initializer|</h1>
+    <p>These static semantics are applied by PerformEval when a direct eval call occurs inside a class field initializer.</p>
+    <emu-grammar>ScriptBody : StatementList</emu-grammar>
+    <ul>
+      <li>It is a Syntax Error if |StatementList| Contains an |IdentifierReference| whose StringValue is `"arguments"`.</li>
+      <li>The remaining eval rules apply as <a href="https://tc39.github.io/ecma262/#sec-performeval-rules-outside-constructors">outside a constructor</a>, <a href="https://tc39.github.io/ecma262/#sec-performeval-rules-outside-methods">inside a method</a>, and <a href="https://tc39.github.io/ecma262/#sec-performeval-rules-outside-functions">inside a function</a>.</li>
+    </ul>
+  </emu-clause>
+</emu-clause>
