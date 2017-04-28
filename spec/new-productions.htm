@@ -7,6 +7,18 @@
     PublicFieldDefinition :
       PropertyName[?Yield] Initializer? ;
   </emu-grammar>
+
+  <emu-clause id="no-arguments">
+    <h1>Static Semantics: Early Errors</h1>
+
+    <emu-grammar>
+      PublicFieldDefinition :
+        PropertyName[?Yield] Initializer?
+    </emu-grammar>
+    <ul>
+      <li>It is a Syntax Error if |Initializer| Contains an |IdentifierReference| whose StringValue is `"arguments"`.
+    </ul>
+  </emu-clause>
 </emu-clause>
 
 <emu-clause id="static-semantics-class-public-fields">
