@@ -5,7 +5,7 @@
 
   <emu-grammar>
     PublicFieldDefinition :
-      PropertyName[?Yield] Initializer?
+      PropertyName[?Yield] Initializer? ;
   </emu-grammar>
 </emu-clause>
 
@@ -42,7 +42,7 @@
   <p>With parameters _isStatic_ and _homeObject_.</p>
 
   <emu-grammar>
-    PublicFieldDefinition : PropertyName[?Yield] Initializer?
+    PublicFieldDefinition : PropertyName[?Yield] Initializer? ;
   </emu-grammar>
   <emu-alg>
     1. Let _fieldName_ be the result of performing PropName of |PropertyName|.
