@@ -3,6 +3,53 @@
 <emu-clause id="class-definitions">
   <h1>Class Definitions</h1>
 
+  <emu-clause id="static-semantics-early-errors">
+    <h1>Static Semantics: Early Errors</h1>
+    <emu-grammar>ClassTail : ClassHeritage? `{` ClassBody `}`</emu-grammar>
+    <ul>
+      <li>
+        <p>It is a Syntax Error if |ClassHeritage| is not present and the following algorithm evaluates to *true*:</p>
+        <emu-alg>
+          1. Let _constructor_ be ConstructorMethod of |ClassBody|.
+          1. If _constructor_ is ~empty~, return *false*.
+          1. Return HasDirectSuper of _constructor_.
+        </emu-alg>
+      </li>
+    </ul>
+    <emu-grammar>ClassBody : ClassElementList</emu-grammar>
+    <ul>
+      <li>
+        It is a Syntax Error if PrototypePropertyNameList of |ClassElementList| contains more than one occurrence of `"constructor"`.
+      </li>
+    </ul>
+    <emu-grammar>ClassElement : MethodDefinition</emu-grammar>
+    <ul>
+      <li>
+        It is a Syntax Error if PropName of |MethodDefinition| is not `"constructor"` and HasDirectSuper of |MethodDefinition| is *true*.
+      </li>
+      <li>
+        It is a Syntax Error if PropName of |MethodDefinition| is `"constructor"` and SpecialMethod of |MethodDefinition| is *true*.
+      </li>
+    </ul>
+    <emu-grammar>ClassElement : `static` MethodDefinition</emu-grammar>
+    <ul>
+      <li>
+        It is a Syntax Error if HasDirectSuper of |MethodDefinition| is *true*.
+      </li>
+      <li>
+        It is a Syntax Error if PropName of |MethodDefinition| is `"prototype"`.
+      </li>
+    </ul>
+    <ins class="block">
+      <emu-grammar>ClassElement : `static` PublicFieldDefinition</emu-grammar>
+      <ul>
+        <li>
+          It is a Syntax Error if PropName of |PublicFieldDefinition| is `"prototype"`.
+        </li>
+      </ul>
+    </ins>
+  </emu-clause>
+
   <emu-clause id="static-semantics-is-static">
     <h1>Static Semantics: IsStatic</h1>
 
