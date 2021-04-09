@@ -1,5 +1,7 @@
 # NOTE: This proposal has been merged with the [Private Fields proposal](https://github.com/tc39/proposal-private-fields) to form a single unified proposal [here](https://github.com/tc39/proposal-class-fields).
 
+![Stage 2](https://badges.aleen42.com/src/tc39_3.svg)
+
 Please do not create new issues/PRs on this repo.
 
 # ES Class Fields & Static Properties
